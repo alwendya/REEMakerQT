@@ -54,6 +54,10 @@ Ce logiciel est sous license libre (GPL3)
   * Ghostscript
 	Interpréteur de fichier PDF.
 	[Licence 'AGPL'](https://www.ghostscript.com/licensing/)
+  * 7ZArchive
+	Décompression de fichier 7Zip.
+	[Licence 'LGPL'](https://www.7-zip.org/license.txt)
+	
 
 ## Autres ressources
 
