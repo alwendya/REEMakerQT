@@ -7,23 +7,27 @@
     <x>0</x>
     <y>0</y>
     <width>940</width>
-    <height>750</height>
+    <height>780</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>940</width>
-    <height>750</height>
+    <height>780</height>
    </size>
   </property>
   <property name="baseSize">
    <size>
     <width>940</width>
-    <height>750</height>
+    <height>780</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>REEMaker - 5.2.0. Initium Novum</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="Resource.qrc">
+    <normaloff>:/REEMaker16</normaloff>:/REEMaker16</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -496,58 +500,41 @@
            <string>Chemin de la procédure :</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="1" column="0">
-            <widget class="QLabel" name="label">
+           <item row="2" column="0" rowspan="2" colspan="2">
+            <widget class="QListWidget" name="FolioListeINFO">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>70</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>70</height>
+              </size>
+             </property>
              <property name="font">
               <font>
+               <pointsize>8</pointsize>
                <bold>false</bold>
               </font>
              </property>
-             <property name="text">
-              <string>Information sur la procédure : </string>
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="Folioter_Label_InformationPDF">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QLineEdit" name="Folioter_Txt_RechercheProcedure">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="placeholderText">
-              <string>Cliquer sur Rechercher pour sélectionner la procédure à folioter</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
+           <item row="3" column="2">
             <widget class="QPushButton" name="Folioter_Btn_EtapeSuivante1">
              <property name="enabled">
               <bool>false</bool>
@@ -599,7 +586,22 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
+           <item row="0" column="0" colspan="2">
+            <widget class="QLineEdit" name="Folioter_Txt_RechercheProcedure">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>Cliquer sur Rechercher pour sélectionner la procédure à folioter</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
             <widget class="QPushButton" name="Folioter_Btn_RechercherPDF">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -636,6 +638,24 @@
                <width>24</width>
                <height>24</height>
               </size>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="Folioter_Label_InformationPDF">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -1385,7 +1405,7 @@
         <item row="0" column="1" colspan="2">
          <widget class="QLabel" name="Annulation_LabelPrevisualisation">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1397,6 +1417,9 @@
           </property>
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
           </property>
           <property name="text">
            <string/>
@@ -1664,318 +1687,6 @@ page de garde utilisateur</string>
         <string>  Options</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_9">
-        <item row="2" column="1">
-         <widget class="QGroupBox" name="groupBox_7">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="title">
-           <string>Autre paramètres :</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_11">
-           <item row="3" column="1">
-            <widget class="QLabel" name="label_55">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Latéral (En point) :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QRadioButton" name="OPT_Radio_HG">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>L'emplacement du tampon sera en haut à gauche de chaque page</string>
-             </property>
-             <property name="text">
-              <string>En haut à gauche</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="6" rowspan="2">
-            <widget class="QCheckBox" name="OPT_Check_GhostScript">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Utilise GhostScript pour remettre en conformité le fichier PDF avant foliotage (Une sauvegarde est effectuée)</string>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="text">
-              <string>Contrôler et corriger le document PDF
-à son ouverture avec Ghostscript</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0" colspan="3">
-            <widget class="QLabel" name="label_54">
-             <property name="text">
-              <string>Marge du tampon :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="6" colspan="2">
-            <widget class="QCheckBox" name="OPT_Check_OuvrirApres">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Les fichiers PDF seront ouverts à la fin de lerus créations</string>
-             </property>
-             <property name="text">
-              <string>Ouvrir les documents PDF après générations</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="2">
-            <widget class="QSpinBox" name="OPT_Spin_Largeur">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Position en point de l'emplacement du tampon par rapport au bord de la page</string>
-             </property>
-             <property name="maximum">
-              <number>100</number>
-             </property>
-             <property name="value">
-              <number>20</number>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="4" colspan="4">
-            <widget class="QLineEdit" name="OPT_Text_FolioAnnule">
-             <property name="statusTip">
-              <string>Texte qui sera écrit sur les folios annulés</string>
-             </property>
-             <property name="text">
-              <string>Folio annulé</string>
-             </property>
-             <property name="maxLength">
-              <number>50</number>
-             </property>
-             <property name="cursorPosition">
-              <number>12</number>
-             </property>
-             <property name="placeholderText">
-              <string>Maximum de 50 caractères</string>
-             </property>
-             <property name="clearButtonEnabled">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1" colspan="3">
-            <widget class="QLabel" name="label_34">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Texte écrit sur les folios annulés (Max 50 caractères) :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>Texte folio annulé :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="4">
-            <widget class="QRadioButton" name="OPT_Radio_BD">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>L'emplacement du tampon sera en bas à droite de chaque page</string>
-             </property>
-             <property name="text">
-              <string>En bas à droite</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QRadioButton" name="OPT_Radio_BG">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>L'emplacement du tampon sera en bas à gauche de chaque page</string>
-             </property>
-             <property name="text">
-              <string>En bas à gauche</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="5">
-            <spacer name="horizontalSpacer_8">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="3" column="4">
-            <widget class="QSpinBox" name="OPT_Spin_Hauteur">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Position en point de l'emplacement du tampon par rapport au bord de la page</string>
-             </property>
-             <property name="maximum">
-              <number>100</number>
-             </property>
-             <property name="value">
-              <number>20</number>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_57">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>40</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="7">
-            <widget class="QSpinBox" name="OPT_Spin_ResolutionDPI">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>55</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>55</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Taille en DPI des fichiers miniatures, valeur conseillée de 40 DPI, une valeur supérieure va augmenter le temps de générations des miniatures</string>
-             </property>
-             <property name="minimum">
-              <number>40</number>
-             </property>
-             <property name="maximum">
-              <number>200</number>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QRadioButton" name="OPT_Radio_HD">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>L'emplacement du tampon sera en haut à droite de chaque page</string>
-             </property>
-             <property name="text">
-              <string>En haut à droite</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="3">
-            <widget class="QLabel" name="label_13">
-             <property name="text">
-              <string>Emplacement du tampon :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="3">
-            <widget class="QLabel" name="label_56">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Vertical (En point ) :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="6">
-            <widget class="QLabel" name="label_58">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Résolution en DPI des miniatures :</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
         <item row="0" column="0" colspan="2">
          <widget class="QGroupBox" name="groupBox_6">
           <property name="font">
@@ -3505,10 +3216,348 @@ page de garde utilisateur</string>
           </layout>
          </widget>
         </item>
+        <item row="2" column="1">
+         <widget class="QGroupBox" name="groupBox_7">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="title">
+           <string>Autre paramètres :</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_11">
+           <item row="3" column="1">
+            <widget class="QLabel" name="label_55">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Latéral (En point) :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QRadioButton" name="OPT_Radio_HG">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>L'emplacement du tampon sera en haut à gauche de chaque page</string>
+             </property>
+             <property name="text">
+              <string>En haut à gauche</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="6" rowspan="2">
+            <widget class="QCheckBox" name="OPT_Check_GhostScript">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>Utilise GhostScript pour remettre en conformité le fichier PDF avant foliotage (Une sauvegarde est effectuée)</string>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>Contrôler et corriger le document PDF
+à son ouverture avec Ghostscript</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="3">
+            <widget class="QLabel" name="label_54">
+             <property name="text">
+              <string>Marge du tampon :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="6" colspan="2">
+            <widget class="QCheckBox" name="OPT_Check_OuvrirApres">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>Les fichiers PDF seront ouverts à la fin de lerus créations</string>
+             </property>
+             <property name="text">
+              <string>Ouvrir les documents PDF après générations</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QSpinBox" name="OPT_Spin_Largeur">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>Position en point de l'emplacement du tampon par rapport au bord de la page</string>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="4" colspan="4">
+            <widget class="QLineEdit" name="OPT_Text_FolioAnnule">
+             <property name="statusTip">
+              <string>Texte qui sera écrit sur les folios annulés</string>
+             </property>
+             <property name="text">
+              <string>Folio annulé</string>
+             </property>
+             <property name="maxLength">
+              <number>50</number>
+             </property>
+             <property name="cursorPosition">
+              <number>12</number>
+             </property>
+             <property name="placeholderText">
+              <string>Maximum de 50 caractères</string>
+             </property>
+             <property name="clearButtonEnabled">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1" colspan="3">
+            <widget class="QLabel" name="label_34">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Texte écrit sur les folios annulés (Max 50 caractères) :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Texte folio annulé :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QRadioButton" name="OPT_Radio_BD">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>L'emplacement du tampon sera en bas à droite de chaque page</string>
+             </property>
+             <property name="text">
+              <string>En bas à droite</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QRadioButton" name="OPT_Radio_BG">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>L'emplacement du tampon sera en bas à gauche de chaque page</string>
+             </property>
+             <property name="text">
+              <string>En bas à gauche</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="5">
+            <spacer name="horizontalSpacer_8">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="3" column="4">
+            <widget class="QSpinBox" name="OPT_Spin_Hauteur">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>Position en point de l'emplacement du tampon par rapport au bord de la page</string>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_57">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="7">
+            <widget class="QSpinBox" name="OPT_Spin_ResolutionDPI">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>55</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>55</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>Taille en DPI des fichiers miniatures, valeur conseillée de 40 DPI, une valeur supérieure va augmenter le temps de générations des miniatures</string>
+             </property>
+             <property name="minimum">
+              <number>40</number>
+             </property>
+             <property name="maximum">
+              <number>200</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QRadioButton" name="OPT_Radio_HD">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>L'emplacement du tampon sera en haut à droite de chaque page</string>
+             </property>
+             <property name="text">
+              <string>En haut à droite</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="3">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>Emplacement du tampon :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QLabel" name="label_56">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Vertical (En point ) :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="6">
+            <widget class="QLabel" name="label_58">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Résolution en DPI des miniatures :</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
         <item row="3" column="1">
+         <widget class="QGroupBox" name="GroupLOG">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="title">
+           <string>Historique des opérations</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_18">
+           <item row="0" column="0">
+            <widget class="QListWidget" name="listLOG">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="4" column="1">
          <spacer name="verticalSpacer_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -4012,9 +4061,11 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;     REEMaker &lt;/span&gt;&lt;span style=&quot; font-size:28pt; vertical-align:super;&quot;&gt;%VERSION%&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:28pt;&quot;&gt;           &lt;/span&gt;&lt;span style=&quot; font-size:28pt; vertical-align:super;&quot;&gt;Initium Novum&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Développé en&lt;/span&gt;&lt;span style=&quot; font-weight:700; font-style:italic;&quot;&gt; C++&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt; sous l'environnement &lt;/span&gt;&lt;span style=&quot; font-weight:700; font-style:italic;&quot;&gt;QT Creator 7.0.0&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt; avec le compilateur &lt;/span&gt;&lt;span style=&quot; font-weight:700; font-style:italic;&quot;&gt;MinGW-W64 11.2.0&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Par &lt;/span&gt;&lt;a href=&quot;mailto:r6fri2zh@anonaddy.me&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Grégory WENTZEL&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Ce logiciel est sous license libre (GPL3) : Le code source est disponible à l'adresse &lt;/span&gt;&lt;a href=&quot;https://www.github.com/alwendya/REEMakerQT&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://www.github.com/alwendya/REEMakerQT&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;Développé en&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; font-style:italic;&quot;&gt; C++&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt; sous l'environnement &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; font-style:italic;&quot;&gt;QT Creator 7.0.0&lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt; avec le compilateur &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; font-style:italic;&quot;&gt;MinGW-W64 11.2.0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;Par &lt;/span&gt;&lt;a href=&quot;mailto:r6fri2zh@anonaddy.me&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;Grégory WENTZEL&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;Ce logiciel est sous license libre (GPL3) : Le code source est disponible à l'adresse &lt;/span&gt;&lt;a href=&quot;https://www.github.com/alwendya/REEMakerQT&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://www.github.com/alwendya/REEMakerQT&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;Vous pouvez supporter les heures passés dessus en me payant un petit thé à l'adresse suivante : &lt;/span&gt;&lt;a href=&quot;https://ko-fi.com/alwendya&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;ko-fi.com/alwendya&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700; text-decoration: underline;&quot;&gt;Les librairies suivantes sont utilisées :&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:700; text-decoration: underline;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
@@ -4060,6 +4111,9 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;  * &lt;span style=&quot; font-weight:700;&quot;&gt;Ghostscript&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	Interpréteur de fichier PDF.&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	&lt;a href=&quot;https://www.ghostscript.com/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Licence 'AGPL'&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;  * &lt;span style=&quot; font-weight:700;&quot;&gt;7ZArchive&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	Décompression de fichier 7z.&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;	&lt;a href=&quot;https://www.7-zip.org/license.txt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Licence 'LGPL'&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Les polices utilisées sont de la famille Roboto (Regular, monospace, bold, italic) et sont sous &lt;/span&gt;&lt;a href=&quot;https://github.com/google/fonts/blob/main/apache/roboto/LICENSE.txt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;licence Apache de Google&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:700;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
@@ -4111,7 +4165,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>tabWidget</tabstop>
   <tabstop>Folioter_Txt_RechercheProcedure</tabstop>
   <tabstop>Folioter_Btn_RechercherPDF</tabstop>
-  <tabstop>Folioter_Btn_EtapeSuivante1</tabstop>
   <tabstop>Folioter_Txt_NomDuSite</tabstop>
   <tabstop>Folioter_Txt_RefREE</tabstop>
   <tabstop>Folioter_Txt_IndiceREE</tabstop>

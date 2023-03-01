@@ -6,7 +6,6 @@
 customHeader::customHeader(QWidget *parent)
     : QWidget{parent}
 {
-    qDebug() << "Ajout du contrôle Header";
     QHBoxLayout *layout = new QHBoxLayout( this );
     layout->setContentsMargins(2,2,2,2);
     QLabel *LabelObligatoire = new QLabel("Obl.");

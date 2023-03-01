@@ -1,7 +1,30 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+//Commenter pour cacher les sorties vers QDebug
+#define AfficheDebug
+//Commenter pour cacher les sorties vers LogList
+#define AfficheLog
+#define MACRO_MSG(t,m)  QMessageBox::information(this,t, m);
 
-#define MACRO_MSG(t,a)  QMessageBox::information(this,t, a);
+//On ecrit dans les deux
+#if defined AfficheDebug && defined AfficheLog
+#define Consigne(Qstring) { qDebug().nospace().noquote() << QDateTime::currentDateTime().toString("hh:mm:ss : ") << Qstring;ui->listLOG->insertItem(0,QDateTime::currentDateTime().toString("hh:mm:ss : ") + Qstring);};
+#endif
+//On ecrit dans AfficheDebug
+#if defined AfficheDebug && !defined AfficheLog
+#define Consigne(Qstring) { qDebug().nospace().noquote() << QDateTime::currentDateTime().toString("hh:mm:ss : ") << Qstring;};
+#endif
+//On ecrit AfficheLog
+#if !defined AfficheDebug && defined AfficheLog
+#define Consigne(Qstring) { ui->listLOG->insertItem(0,QDateTime::currentDateTime().toString("hh:mm:ss : ") + Qstring); };
+#endif
+//On ecrit rien
+#if !defined AfficheDebug && !defined AfficheLog
+#define Consigne(Qstring) ;
+#endif
+
+#define MACRO_COLORtoDOUBLE(vecteur,tr) (double)vecteur[tr].redF(), (double)vecteur[tr].greenF(), (double)vecteur[tr].blueF()
+
 
 
 ///
@@ -27,215 +50,92 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    ModeAjoutPDG = false;
-
     ui->setupUi(this);
-    validUPPER = new MyValidatorUPPER(this);
-    mVersion = GetVersion(qApp->arguments()[0]);
-    this->setWindowTitle(QString("REEMaker V%1").arg(mVersion));
-    ui->APROPOS_Texte->document()->setHtml(ui->APROPOS_Texte->document()->toHtml().replace("%VERSION%",mVersion));
-    QTextCursor textCursor = ui->APROPOS_Texte->textCursor();
-    textCursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
-    ui->APROPOS_Texte->setTextCursor(textCursor); // The line to add
-    ui->Folioter_Group_RefTampon->setVisible(false);
-    ui->Folioter_Group_Etendue->setVisible(false);
-    ui->Folioter_Group_Annuler->setVisible(false);
-    ui->Folioter_Group_ChoixTranche->setVisible(false);
-    ui->Folioter_Btn_EtapeSuivante1->setEnabled(false);
-    ui->Folioter_Btn_EtapeSuivante2->setEnabled(false);
-    ui->tabWidget->setTabVisible(1,false);
-    ui->Annulation_Liste->setColumnCount(2);
-    ui->Annulation_Liste->setRowCount(0);
-    ui->Annulation_Liste->setColumnWidth(0,20);
-    ui->Annulation_Liste->setColumnWidth(1,160);
-    {// Fichier INI
-
-        QSettings settings(QCoreApplication::applicationDirPath() + "/REEMAKER.ini", QSettings::IniFormat);
-
-        ThemeDark = settings.value("REGLAGES/ThemeSombre","false").toBool();
-
-        ui->Folioter_Txt_NomDuSite->setText(settings.value("REGLAGES/TAMPON_NomDuSite","").toString());
-        ui->Folioter_Txt_RefREE->setText(settings.value("REGLAGES/TAMPON_ReferenceREE","").toString());
-        ui->Folioter_Txt_IndiceREE->setText(settings.value("REGLAGES/TAMPON_Indice","").toString());
-        ui->Folioter_Spin_PremierePage->setValue(settings.value("REGLAGES/Folio_premier_numero","3").toInt());
-        ui->Folioter_Texte_Tranche0->setText(settings.value("REGLAGES/CycleTranche0","").toString());
-        ui->Folioter_Texte_Tranche1->setText(settings.value("REGLAGES/CycleTranche1","").toString());
-        ui->Folioter_Texte_Tranche2->setText(settings.value("REGLAGES/CycleTranche2","").toString());
-        ui->Folioter_Texte_Tranche3->setText(settings.value("REGLAGES/CycleTranche3","").toString());
-        ui->Folioter_Texte_Tranche4->setText(settings.value("REGLAGES/CycleTranche4","").toString());
-        ui->Folioter_Texte_Tranche5->setText(settings.value("REGLAGES/CycleTranche5","").toString());
-        ui->Folioter_Texte_Tranche6->setText(settings.value("REGLAGES/CycleTranche6","").toString());
-        ui->Folioter_Texte_Tranche7->setText(settings.value("REGLAGES/CycleTranche7","").toString());
-        ui->Folioter_Texte_Tranche8->setText(settings.value("REGLAGES/CycleTranche8","").toString());
-        ui->Folioter_Texte_Tranche9->setText(settings.value("REGLAGES/CycleTranche9","").toString());
-        ui->PDG_Texte_PDGEnCours->setText(settings.value("REGLAGES/PDGutilise","page de garde standard BPA").toString().toUpper());
-        ui->OPT_BText_CoulTranche_0->setText(settings.value("REGLAGES/CouleurTampon0","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_1->setText(settings.value("REGLAGES/CouleurTampon1","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_2->setText(settings.value("REGLAGES/CouleurTampon2","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_3->setText(settings.value("REGLAGES/CouleurTampon3","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_4->setText(settings.value("REGLAGES/CouleurTampon4","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_5->setText(settings.value("REGLAGES/CouleurTampon5","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_6->setText(settings.value("REGLAGES/CouleurTampon6","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_7->setText(settings.value("REGLAGES/CouleurTampon7","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_8->setText(settings.value("REGLAGES/CouleurTampon8","#0000FF").toString());
-        ui->OPT_BText_CoulTranche_9->setText(settings.value("REGLAGES/CouleurTampon9","#0000FF").toString());
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_0,ui->OPT_Btn_ColTranche0);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_1,ui->OPT_Btn_ColTranche1);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_2,ui->OPT_Btn_ColTranche2);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_3,ui->OPT_Btn_ColTranche3);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_4,ui->OPT_Btn_ColTranche4);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_5,ui->OPT_Btn_ColTranche5);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_6,ui->OPT_Btn_ColTranche6);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_7,ui->OPT_Btn_ColTranche7);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_8,ui->OPT_Btn_ColTranche8);
-        COLORfromTEXT(ui->OPT_BText_CoulTranche_9,ui->OPT_Btn_ColTranche9);
-        ui->OPT_BText_CoulAccent_0->setText(settings.value("REGLAGES/CouleurAccent0","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_1->setText(settings.value("REGLAGES/CouleurAccent1","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_2->setText(settings.value("REGLAGES/CouleurAccent2","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_3->setText(settings.value("REGLAGES/CouleurAccent3","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_4->setText(settings.value("REGLAGES/CouleurAccent4","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_5->setText(settings.value("REGLAGES/CouleurAccent5","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_6->setText(settings.value("REGLAGES/CouleurAccent6","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_7->setText(settings.value("REGLAGES/CouleurAccent7","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_8->setText(settings.value("REGLAGES/CouleurAccent8","#E8E8E8").toString());
-        ui->OPT_BText_CoulAccent_9->setText(settings.value("REGLAGES/CouleurAccent9","#E8E8E8").toString());
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_0,ui->OPT_Btn_ColAccent0);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_1,ui->OPT_Btn_ColAccent1);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_2,ui->OPT_Btn_ColAccent2);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_3,ui->OPT_Btn_ColAccent3);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_4,ui->OPT_Btn_ColAccent4);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_5,ui->OPT_Btn_ColAccent5);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_6,ui->OPT_Btn_ColAccent6);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_7,ui->OPT_Btn_ColAccent7);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_8,ui->OPT_Btn_ColAccent8);
-        COLORfromTEXT(ui->OPT_BText_CoulAccent_9,ui->OPT_Btn_ColAccent9);
-
-        qint16 Emplacement = settings.value("REGLAGES/EmplacementTampon","0").toInt();
-        if (Emplacement == 0)
-            ui->OPT_Radio_HG->setChecked(true);
-        if (Emplacement == 1)
-            ui->OPT_Radio_HD->setChecked(true);
-        if (Emplacement == 2)
-            ui->OPT_Radio_BG->setChecked(true);
-        if (Emplacement == 3)
-            ui->OPT_Radio_BD->setChecked(true);
-
-        ui->OPT_Check_OuvrirApres->setChecked(settings.value("REGLAGES/OuvrirApres",true).toBool());
-        ui->OPT_Check_GhostScript->setChecked(settings.value("REGLAGES/Reparer",true).toBool());
-
-        ui->OPT_Spin_Largeur->setValue(settings.value("REGLAGES/MargeLateral","20").toInt());
-        ui->OPT_Spin_Hauteur->setValue(settings.value("REGLAGES/MargeVertical","20").toInt());
-        ui->OPT_Spin_ResolutionDPI->setValue(settings.value("REGLAGES/ResolutionDPI","40").toInt());
-
-        ui->OPT_Text_FolioAnnule->setText(settings.value("REGLAGES/FolioAnnule","Folio annulé").toString());
-
-        PDGManuelNomSite = settings.value("REGLAGES/MANUEL_NomDuSite","").toString();
-        PDGManuelRefREE = settings.value("REGLAGES/MANUEL_ReferenceREE","").toString();
-        PDGManuelIndice = settings.value("REGLAGES/MANUEL_Indice","").toString();
-
-    }
-    CheminPoppler = QCoreApplication::applicationDirPath() + "/PdfToPPM/pdftoppm.exe";
-    CheminGhostScript = QCoreApplication::applicationDirPath() + "/GhostScript/BatchGhostScript.bat";
-    CheminPDGUtilisateur = QCoreApplication::applicationDirPath() + "/PDG_utilisateur/";
-    {
-        QDir directory(QFileInfo(CheminPDGUtilisateur).filePath());
-        QStringList lstPDGBase = directory.entryList(QStringList() << "*.txt",QDir::Files, QDir::Name | QDir::IgnoreCase);
-        foreach (QString lPDG, lstPDGBase) {
-            ui->PDG_Combo_Utilisateur->addItem(QFileInfo(CheminPDGUtilisateur + lPDG).baseName());
-        }
-    }
-    CheminPDGBase = QCoreApplication::applicationDirPath() + "/PDG_modele/";
-    {
-        QDir directory(QFileInfo(CheminPDGBase).filePath());
-        QStringList lstPDGBase = directory.entryList(QStringList() << "*.txt",QDir::Files, QDir::Name | QDir::IgnoreCase);
-        int DefautIndex = -1;
-        foreach (QString lPDG, lstPDGBase) {
-            ui->PDG_Combo_Integre->addItem(QFileInfo(CheminPDGBase + lPDG).baseName());
-            if (lPDG.toLower() == "page de garde standard bpa.txt") //On sait que cette PageDeGarde est la : page de garde standard BPA.txt
-                DefautIndex = ui->PDG_Combo_Integre->count()-1;
-        }
-        if (DefautIndex != -1)
-        {
-            ui->PDG_Combo_Integre->setCurrentIndex(DefautIndex);
-        }
-    }
-    {
-        bool TrouvePDG = false;
-        //Test si ce nom est dans combo integré
-        for (int var = 0; var < ui->PDG_Combo_Integre->count(); ++var) {
-            if(ui->PDG_Combo_Integre->itemText(var).toUpper() == ui->PDG_Texte_PDGEnCours->text().toUpper())
-            {
-                ui->PDG_Combo_Integre->setCurrentIndex(var);
-                ui->PDG_Texte_PDGEnCours->setText(ui->PDG_Combo_Integre->itemText(var).toUpper());
-                ChargerPageDeGarde(ui->PDG_Combo_Integre->itemText(var),CheminPDGBase);
-                TrouvePDG = true;
-                break;
-            }
-        }
-        //Test si ce nom est dans Combo utilisateur
-        if (!TrouvePDG)
-            for (int var = 0; var < ui->PDG_Combo_Utilisateur->count(); ++var) {
-                if(ui->PDG_Combo_Utilisateur->itemText(var).toUpper() == ui->PDG_Texte_PDGEnCours->text().toUpper())
-                {
-                    ui->PDG_Combo_Utilisateur->setCurrentIndex(var);
-                    ui->PDG_Texte_PDGEnCours->setText(ui->PDG_Combo_Utilisateur->itemText(var).toUpper());
-                    ChargerPageDeGarde(ui->PDG_Combo_Utilisateur->itemText(var),CheminPDGUtilisateur);
-                    TrouvePDG = true;
-                    break;
-                }
-            }
-        //Aucun, on le reset
-        if (!TrouvePDG)
-            for (int var = 0; var < ui->PDG_Combo_Integre->count(); ++var) {
-                if(ui->PDG_Combo_Integre->itemText(var).toLower() == "page de garde standard bpa")
-                {
-                    ui->PDG_Combo_Integre->setCurrentIndex(var);
-                    ui->PDG_Texte_PDGEnCours->setText(ui->PDG_Combo_Integre->itemText(var).toUpper());
-                    ChargerPageDeGarde(ui->PDG_Combo_Integre->itemText(var),CheminPDGBase);
-                    break;
-                }
-            }
-
-    }
-
-    QString RANDOM = QUuid::createUuid().toString();
-    RANDOM.remove(QRegularExpression("{|}|-")); // Seulement les caractères en hexa
-    CheminTemp = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/" + RANDOM;
-    QDir().mkpath(CheminTemp);
-    TempTamponRoboto = CheminTemp + "/Roboto-Regular.ttf";
-    QFile::copy(QCoreApplication::applicationDirPath() + "/Police/Roboto-Regular.ttf",TempTamponRoboto);
-    ui->Folioter_Txt_NomDuSite->setValidator(validUPPER);
-    ui->Folioter_Txt_RefREE->setValidator(validUPPER);
-    ui->Folioter_Txt_IndiceREE->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche0->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche1->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche2->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche3->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche4->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche5->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche6->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche7->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche8->setValidator(validUPPER);
-    ui->Folioter_Texte_Tranche9->setValidator(validUPPER);
-
-
-    if (ThemeDark)
-        ui->APROPOS_Texte->setStyleSheet("a {color: white; }");
-
-    ui->EDIT_Liste->setSortingEnabled(false);
-
+#ifndef AfficheLog
+    ui->GroupLOG->setVisible(false);
+    ui->verticalSpacer_2->changeSize(20,40,QSizePolicy::Expanding,QSizePolicy::Expanding);
+#else
+    ui->GroupLOG->setVisible(true);
+    ui->verticalSpacer_2->changeSize(20,0,QSizePolicy::Expanding,QSizePolicy::Fixed);
+#endif
+    ModeAjoutPDG = false;
+    //Lecture donnée utilisateur
+    LectureINI();
+    //Mise en place des dossiers des programmes et des pages de gardes
+    MiseEnPlaceChemin();
+    //Mise en place des validators MAJUSCULE
+    MiseEnPlaceValidator();
+    //Contrôle de l'intégrité des fichiers
+    //Mise en place de l'interface (A besoin de la lecture INI avant!!!)
+    MiseEnPlaceInterface();
+    // Contrôle de l'intégrité des fichiers
     CheckIntegrite();
+    // Setting de la liste
+    MiseEnPlaceListInfo();
+    Consigne("REEMaker a démarré avec succès")
+            // Démarrage de la recherche de mise à jour + création signal
+            connect(this, &MainWindow::LanceUneMAJ, this, [&](QString Version, QUrl Chemin) {
+        if (QMessageBox::question(this, "Version " + Version.mid(2) + " disponible !", "Une mise à jour est disponible.\nVoulez-vous la télécharger et l'installer ?\n(L'application sera redémarrée pour procéder à la mise à jour)",
+                                  QMessageBox::Yes|QMessageBox::No, QMessageBox::No)
+                == QMessageBox::Yes)
+        {
+            DemarreLeTelechargement(Chemin);
+        }
+    }, Qt::QueuedConnection);
+    QThread* thread = QThread::create([&]
+    {
+        QThread::msleep(10000);
 
-    ClairSombreAction = ui->menubar->addAction("Basculer entre le &mode clair et sombre");
-    connect(ClairSombreAction, SIGNAL(triggered()), this, SLOT(BasculerClairSombre()));
-    ui->menubar->addSeparator();
-    AfficheEditAction = ui->menubar->addAction("Basculer vers l'&Editeur de page de garde");
-    connect(AfficheEditAction, SIGNAL(triggered()), this, SLOT(AfficheEditeurPDG()));
-    ui->menubar->addSeparator();
-    helpAction = ui->menubar->addAction("&Afficher l'aide");
-    connect(helpAction, SIGNAL(triggered()), this, SLOT(AfficheAide()));
-    ui->tabWidget->setCurrentIndex(0);
-    ui->tabWidget->setTabVisible(4,false);
+        auto Reponse = DerniereVersion();
+        if (Reponse == "Timeout")
+        {
+            this->setWindowTitle(this->windowTitle() + " [Erreur à la récupération de la dernière version disponible]");
+            Consigne("Impossible d'atteindre le serveur de mise à jour (https://github.com/alwendya/REEMakerQT).");
+        }
+        else if (Reponse.startsWith("v.",Qt::CaseInsensitive))
+        {
+            QString cReponse = Reponse;
+            QString cmVersion = mVersion;
+            qint16 VersionServeurINT = QString(cReponse.replace("v.","").replace(".","")).toInt();
+            qint16 VersionLocal = QString(cmVersion.replace(".","")).toInt();
+            qDebug().noquote().nospace() << QString("Version interne : %1, Version disponible : %2, la mise à jour %3 nécessaire")
+                        .arg(QString::number(VersionLocal),QString::number(VersionServeurINT),QString((VersionServeurINT > VersionLocal)?"est":"n'est pas"));
+            if (VersionServeurINT > VersionLocal)
+            {
+                this->setWindowTitle(this->windowTitle() + " [Une mise à jour est disponible : " + Reponse.toUpper() + "]");
+                QUrl updateUrl("https://github.com/alwendya/REEMakerQT/releases/download/" + Reponse + "/REEMaker.Update.7z");
+                Consigne("Une mise à jour [" +Reponse + "] a été trouvée.");
+                emit LanceUneMAJ(Reponse, updateUrl);
+            }
+            else
+            {
+                this->setWindowTitle(this->windowTitle() + " [Vous êtes à jour]");
+            }
+        }
+        else
+        {
+            qDebug().noquote().nospace() << "On devrait pas être la...";
+        }
+    });
+    if (QFile::exists(QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/update.REEMaker.7z"))
+    {
+        QFile::remove(QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/update.REEMaker.7z");
+        Consigne("Mise à jour effectuée avec succès !");
+        QString Commentaire = "";
+        if (QFile::exists(QCoreApplication::applicationDirPath() + "/Commentaire de mise à jour.txt"))//Fichier de MAJ existe
+        {
+            QFile file(QCoreApplication::applicationDirPath() + "/Commentaire de mise à jour.txt");
+            if (file.open(QIODevice::ReadOnly))
+            {
+                QByteArray blob = file.readAll();
+                Commentaire = "\n\n" + QString(blob);
+                file.close();
+            }
+            QFile::remove(QCoreApplication::applicationDirPath() + "/Commentaire de mise à jour.txt");
+        }
+        MACRO_MSG("Information",QString("Mise à jour effectué avec succès !%1").arg(Commentaire));
+    }
+    thread->start();
 }
 
 ///
@@ -244,74 +144,44 @@ MainWindow::MainWindow(QWidget *parent)
 ///
 MainWindow::~MainWindow()
 {
+    //Suppression du dossier TEMP
     QDir(CheminTemp).removeRecursively();
-    // SAUVEGARDE DES PARAMETRES UTILISATEURS
-
-    QSettings settings(QCoreApplication::applicationDirPath() + "/REEMAKER.ini", QSettings::IniFormat);// Création du fichier en précisant que l'on travaille avec un fichier de format INI.
-    settings.beginGroup("REGLAGES");
-
-    settings.setValue("TAMPON_NomDuSite", ui->Folioter_Txt_NomDuSite->text());
-    settings.setValue("TAMPON_ReferenceREE", ui->Folioter_Txt_RefREE->text());
-    settings.setValue("TAMPON_Indice", ui->Folioter_Txt_IndiceREE->text());
-    settings.setValue("Folio_premier_numero", ui->Folioter_Spin_PremierePage->value());
-
-    settings.setValue("CycleTranche0", ui->Folioter_Texte_Tranche0->text());
-    settings.setValue("CycleTranche1", ui->Folioter_Texte_Tranche1->text());
-    settings.setValue("CycleTranche2", ui->Folioter_Texte_Tranche2->text());
-    settings.setValue("CycleTranche3", ui->Folioter_Texte_Tranche3->text());
-    settings.setValue("CycleTranche4", ui->Folioter_Texte_Tranche4->text());
-    settings.setValue("CycleTranche5", ui->Folioter_Texte_Tranche5->text());
-    settings.setValue("CycleTranche6", ui->Folioter_Texte_Tranche6->text());
-    settings.setValue("CycleTranche7", ui->Folioter_Texte_Tranche7->text());
-    settings.setValue("CycleTranche8", ui->Folioter_Texte_Tranche8->text());
-    settings.setValue("CycleTranche9", ui->Folioter_Texte_Tranche9->text());
-
-    settings.setValue("PDGutilise", ui->PDG_Texte_PDGEnCours->text());
-
-    settings.setValue("CouleurTampon0", ui->OPT_BText_CoulTranche_0->text());
-    settings.setValue("CouleurTampon1", ui->OPT_BText_CoulTranche_1->text());
-    settings.setValue("CouleurTampon2", ui->OPT_BText_CoulTranche_2->text());
-    settings.setValue("CouleurTampon3", ui->OPT_BText_CoulTranche_3->text());
-    settings.setValue("CouleurTampon4", ui->OPT_BText_CoulTranche_4->text());
-    settings.setValue("CouleurTampon5", ui->OPT_BText_CoulTranche_5->text());
-    settings.setValue("CouleurTampon6", ui->OPT_BText_CoulTranche_6->text());
-    settings.setValue("CouleurTampon7", ui->OPT_BText_CoulTranche_7->text());
-    settings.setValue("CouleurTampon8", ui->OPT_BText_CoulTranche_8->text());
-    settings.setValue("CouleurTampon9", ui->OPT_BText_CoulTranche_9->text());
-
-    settings.setValue("CouleurAccent0", ui->OPT_BText_CoulAccent_0->text());
-    settings.setValue("CouleurAccent1", ui->OPT_BText_CoulAccent_1->text());
-    settings.setValue("CouleurAccent2", ui->OPT_BText_CoulAccent_2->text());
-    settings.setValue("CouleurAccent3", ui->OPT_BText_CoulAccent_3->text());
-    settings.setValue("CouleurAccent4", ui->OPT_BText_CoulAccent_4->text());
-    settings.setValue("CouleurAccent5", ui->OPT_BText_CoulAccent_5->text());
-    settings.setValue("CouleurAccent6", ui->OPT_BText_CoulAccent_6->text());
-    settings.setValue("CouleurAccent7", ui->OPT_BText_CoulAccent_7->text());
-    settings.setValue("CouleurAccent8", ui->OPT_BText_CoulAccent_8->text());
-    settings.setValue("CouleurAccent9", ui->OPT_BText_CoulAccent_9->text());
-
-    if (ui->OPT_Radio_HG->isChecked())
-        settings.setValue("EmplacementTampon", 0);
-    if (ui->OPT_Radio_HD->isChecked())
-        settings.setValue("EmplacementTampon", 1);
-    if (ui->OPT_Radio_BG->isChecked())
-        settings.setValue("EmplacementTampon", 2);
-    if (ui->OPT_Radio_BD->isChecked())
-        settings.setValue("EmplacementTampon", 3);
-
-    settings.setValue("OuvrirApres", ui->OPT_Check_OuvrirApres->isChecked());
-    settings.setValue("Reparer", ui->OPT_Check_GhostScript->isChecked());
-    settings.setValue("MargeLateral", ui->OPT_Spin_Largeur->value());
-    settings.setValue("MargeVertical", ui->OPT_Spin_Hauteur->value());
-    settings.setValue("ResolutionDPI", ui->OPT_Spin_ResolutionDPI->value());
-    settings.setValue("FolioAnnule", ui->OPT_Text_FolioAnnule->text());
-    settings.setValue("ThemeSombre", ThemeDark);
-    settings.setValue("REGLAGES/MANUEL_NomDuSite", PDGManuelNomSite);
-    settings.setValue("REGLAGES/MANUEL_ReferenceREE", PDGManuelRefREE);
-    settings.setValue("REGLAGES/MANUEL_Indice", PDGManuelIndice);
-    settings.endGroup();
-
-
+    if(ui->listLOG->count() > 0)
+    {
+        QString CheminLOG = QCoreApplication::applicationDirPath() + "/Journal de bord.txt";
+        QStringList ContenuJDB;
+        //On charge l'ancien si existant
+        {
+            QFile FichierJDB(CheminLOG);
+            if (FichierJDB.open(QIODevice::ReadOnly))
+            {
+                QTextStream in(&FichierJDB);
+                while (!in.atEnd())
+                    ContenuJDB.append(in.readLine());
+                FichierJDB.close();
+            }
+        }
+        //On supprime les trops anciens (Max 1000 entrées)
+        if (ContenuJDB.count()> 1000)
+            ContenuJDB.resize(1000);
+        //On complémente avec le JDB actuel
+        for (int var = 0; var < ui->listLOG->count(); ++var)
+            ContenuJDB.prepend(ui->listLOG->item(ui->listLOG->count() - var - 1)->text());
+        //On sauvegarde le tout
+        {
+            QFile FichierJDB(CheminLOG);
+            if (FichierJDB.open(QIODevice::WriteOnly))
+            {
+                QTextStream f_out(&FichierJDB);
+                for (qsizetype nLigne = 0; nLigne < ContenuJDB.size(); nLigne++)
+                    f_out << ContenuJDB[nLigne] << Qt::endl;
+                FichierJDB.close();
+            }
+        }
+    }
+    //Sauvegarde des données utilisateurs
+    SauveINI();
+    // Deletion de l'UI
     delete ui;
 }
 
@@ -507,39 +377,47 @@ void MainWindow::on_Folioter_Btn_RechercherPDF_clicked()
         return;
     ui->Folioter_Txt_RechercheProcedure->setText(PDFOuvert);
     ui->Folioter_Label_NombreFolioAnnuler->setText("Aucun folio annulé");
+    qint16 NombrePage = PDFInfoNombrePage(PDFOuvert);
+    Consigne("PDFInfo : Donné récupéré avec " + QString::number(NombrePage) + " pages");
     if(ui->OPT_Check_GhostScript->isChecked())
     {
-        qint16 NombrePage = PDFInfoNombrePage(PDFOuvert);
         auto CodeErreur = RepareGhostScript(PDFOuvert,NombrePage,false);
         switch (CodeErreur) {
         case ValeurRetour::AucunFichierEntree:
         {
             QMessageBox::critical(this, "REEMaker - Erreur","Fichier d'entrée introuvable");
+            Consigne("Erreur : Fichier d'entrée introuvable");
             ui->Folioter_Txt_RechercheProcedure->setText("");
             return;
         }
         case ValeurRetour::ErreurDeplacement:
         {
             QMessageBox::critical(this, "REEMaker - Erreur","Erreur dans la sauvegarde du document PDF");
+            Consigne("Erreur dans la sauvegarde du document PDF");
             ui->Folioter_Txt_RechercheProcedure->setText("");
             return;
         }
         case ValeurRetour::GhostScriptAbsent:
         {
             QMessageBox::critical(this, "REEMaker - Erreur","Erreur dans les fichiers de Ghostscript, réinstaller REEMaker");
+            Consigne("Erreur dans les fichiers de Ghostscript, réinstaller REEMaker");
             ui->Folioter_Txt_RechercheProcedure->setText("");
             return;
         }
         case ValeurRetour::ErreurDeGhostScript:
         {
             QMessageBox::warning(this, "REEMaker - Attention","Ghostscript n'a pu réparer le document.\nREEMaker va continuer avec le document PDF original.");
+            Consigne("Ghostscript n'a pu réparer le document.\nREEMaker va continuer avec le document PDF original");
             break;
         }
         case ValeurRetour::Succes:// L'opération à réussi
+            Consigne("GhostScript à terminé sans erreur");
             break;
         default:// L'opération à réussi
+            Consigne("GhostScript à terminé sans erreur");
             break;
         }
+        Consigne("Ouverture de '" + QFileInfo(PDFOuvert).fileName() + "' réussi.");
     }
     QProgressDialog progress("Ouverture du fichier PDF...", "", 0, 0, this);
     if (ThemeDark)
@@ -571,77 +449,6 @@ void MainWindow::on_Folioter_Btn_RechercherPDF_clicked()
             vecRotation.push_back(pPage->GetRotation());
             vecFolioAnnuler.push_back(false);
         }
-        QString PdfVErsionToString = "";
-        switch (documentSource.GetPdfVersion())
-        {
-        case PoDoFo::ePdfVersion_1_0:
-            PdfVErsionToString = "PDF Version 1.0";
-            break;
-        case PoDoFo::ePdfVersion_1_1:
-            PdfVErsionToString = "PDF Version 1.1";
-            break;
-        case PoDoFo::ePdfVersion_1_2:
-            PdfVErsionToString = "PDF Version 1.2";
-            break;
-        case PoDoFo::ePdfVersion_1_3:
-            PdfVErsionToString = "PDF Version 1.3";
-            break;
-        case PoDoFo::ePdfVersion_1_4:
-            PdfVErsionToString = "PDF Version 1.4";
-            break;
-        case PoDoFo::ePdfVersion_1_5:
-            PdfVErsionToString = "PDF Version 1.5";
-            break;
-        case PoDoFo::ePdfVersion_1_6:
-            PdfVErsionToString = "PDF Version 1.6";
-            break;
-        case PoDoFo::ePdfVersion_1_7:
-            PdfVErsionToString = "PDF Version 1.7";
-            break;
-        default:
-            PdfVErsionToString = "PDF Version Inconnu";
-            break;
-        }
-        QString pdfDETAIL = "<vide>";
-        QString sAuteur = "<vide>";
-        QString sCreePar = "<vide>";
-        QString sDateTime = "<vide>";
-        try
-        {
-            QDateTime Creation;
-            if (documentSource.GetInfo()->GetCreationDate().GetTime() > 0)
-                Creation = QDateTime::fromSecsSinceEpoch(documentSource.GetInfo()->GetCreationDate().GetTime(),Qt::LocalTime);
-            else
-                Creation = QFileInfo(PDFOuvert).birthTime();
-            const QLocale locales[]{ QLocale::French };
-            sDateTime = QString("%1").arg(locales[0].toString(Creation, "ddd dd MMM yyyy"/*QLocale::LongFormat*/));
-        }
-        catch (const std::exception&)
-        {
-        }
-        try
-        {
-            sAuteur = QString::fromStdWString(documentSource.GetInfo()->GetAuthor().GetStringW());
-            if (sAuteur.length() > 20)
-                sAuteur = sAuteur.chopped(20);
-            if (sAuteur == "") sAuteur = "<vide>";
-        }
-        catch (const std::exception&)
-        {
-        }
-        try
-        {
-            sCreePar = QString::fromStdWString(documentSource.GetInfo()->GetCreator().GetStringW());
-            if (sCreePar.length() > 20)
-                sCreePar = sCreePar.chopped(20);
-            if (sCreePar == "") sCreePar = "<vide>";
-        }
-        catch (const std::exception&)
-        {
-        }
-        pdfDETAIL = QString("Auteur : %1, Crée par : %2, Le %3").arg(sAuteur, sCreePar, sDateTime);
-        ui->Folioter_Label_InformationPDF->setText(QString(" %1 page(s) pour %2 Mo [%3, %4]").arg(QString::number(NombrePages), QString::number(QFileInfo(PDFOuvert).size() / 1024 / 1024), PdfVErsionToString, pdfDETAIL));
-
         ui->Folioter_Group_RefTampon->setVisible(false);
         ui->Folioter_Group_Etendue->setVisible(false);
         ui->Folioter_Group_Annuler->setVisible(false);
@@ -651,14 +458,31 @@ void MainWindow::on_Folioter_Btn_RechercherPDF_clicked()
     }
     catch (const PoDoFo::PdfError& e)
     {
+        MiseEnPlaceListInfo();
         if (e.GetError() == PoDoFo::ePdfError_FileNotFound)
-            ui->Folioter_Label_InformationPDF->setText("Erreur : Le fichier est introuvable");
+        {
+            ui->FolioListeINFO->addItem("Information sur le fichier PDF :");
+            ui->FolioListeINFO->addItem("Erreur : Le fichier est introuvable");
+            Consigne("Erreur : Le fichier est introuvable");
+        }
         else if (e.GetError() == PoDoFo::ePdfError_BrokenFile)
-            ui->Folioter_Label_InformationPDF->setText("Erreur : Le fichier est endommagé");
+        {
+            ui->FolioListeINFO->addItem("Information sur le fichier PDF :");
+            ui->FolioListeINFO->addItem("Erreur : Le fichier est endommagé, essayez d'activer le contrôle par GhostScript dans les options");
+            Consigne("Erreur : Le fichier est endommagé, essayez d'activer le contrôle par GhostScript dans les options");
+        }
         else if (e.GetError() == PoDoFo::ePdfError_NoPdfFile)
-            ui->Folioter_Label_InformationPDF->setText("Erreur : Le fichier n'est pas un fichier PDF");
+        {
+            ui->FolioListeINFO->addItem("Information sur le fichier PDF :");
+            ui->FolioListeINFO->addItem("Erreur : Le fichier n'est pas un fichier PDF");
+            Consigne("Erreur : Le fichier n'est pas un fichier PDF");
+        }
         else
-            ui->Folioter_Label_InformationPDF->setText(QString("Erreur à l'ouverture : %1").arg(QString::fromStdString(e.what())));
+        {
+            ui->FolioListeINFO->addItem("Information sur le fichier PDF :");
+            ui->FolioListeINFO->addItem(QString("Erreur à l'ouverture : %1").arg(QString::fromStdString(e.what())));
+            Consigne(QString("Erreur à l'ouverture : %1").arg(QString::fromStdString(e.what())));
+        }
     }
     ModeAjoutPDG = false;
     progress.close();
@@ -1177,7 +1001,7 @@ void MainWindow::on_Folioter_Btn_ChoixFolioAnnuler_clicked()
     auto procPPM = new QProcess();
     QString PathOutputImage = QFileInfo(CheminTemp).filePath() + "/_64_";
     procPPM->setWorkingDirectory(QFileInfo(CheminPoppler).path());
-    procPPM->setProgram(CheminPoppler);//QDir::toNativeSeparators
+    procPPM->setProgram(CheminPoppler);
     procPPM->setArguments({
                               "-f",
                               QString::number(PageDebut),
@@ -1189,8 +1013,8 @@ void MainWindow::on_Folioter_Btn_ChoixFolioAnnuler_clicked()
                               "-scale-to",
                               "64",
                               "-png",
-                              QDir::toNativeSeparators(PDFOuvert),
-                              QDir::toNativeSeparators(PathOutputImage)
+                              PDFOuvert,
+                              PathOutputImage
                           });
     QProgressDialog progress("Génération des miniatures...", "Annuler", 0, 0, this);
     progress.setStyle(new DarkStyle);
@@ -1229,7 +1053,8 @@ void MainWindow::on_Folioter_Btn_ChoixFolioAnnuler_clicked()
     }
     procPPM->close();
     progress.close();
-    //      fin de QProcess => Population de la liste
+    Consigne("Fin de génération des miniatures par Poppler");
+
     QDir directory(QFileInfo(CheminTemp).filePath());
     QStringList images = directory.entryList(QStringList() << "_64_*.png",QDir::Files, QDir::Name | QDir::IgnoreCase);
     vecFolioAnnuler.clear();
@@ -1277,6 +1102,7 @@ void MainWindow::on_Annulation_Btn_Valider_clicked()
     ui->Folioter_Label_NombreFolioAnnuler->setText(QString("%1 folio%2 annulé%3").arg(QString::number(NombreAnnule),(NombreAnnule>1)?"s":"",(NombreAnnule>1)?"s":""));
     ui->Annulation_Liste->setRowCount(0);
     ui->Annulation_LabelPrevisualisation->setPixmap(QPixmap());
+    Consigne("Annulation de " + QString::number(NombreAnnule) + " folios");
 }
 
 ///
@@ -1301,6 +1127,8 @@ void MainWindow::on_Annulation_Btn_NePasAnnuler_clicked()
     vecFolioAnnuler.clear();
     vecFolioAnnuler.resize(vecRotation.count());//On remet tout à false
     ui->Folioter_Label_NombreFolioAnnuler->setText("Aucun folio annulé");
+    Consigne("Aucun folio n'est annulé");
+
 }
 
 ///
@@ -1326,8 +1154,8 @@ void MainWindow::on_Annulation_Liste_cellClicked(int row, int column)
                               "-r",
                               "100",
                               "-png",
-                              QDir::toNativeSeparators(PDFOuvert),
-                              QDir::toNativeSeparators(PathOutputImage)
+                              /*QDir::toNativeSeparators(*/PDFOuvert/*)*/,
+                              /*QDir::toNativeSeparators(*/PathOutputImage/*)*/
                           });
     QProgressDialog progress("Préparation de l'image...", "Annuler", 0, 0, this);
     progress.setStyle(new DarkStyle);
@@ -1357,7 +1185,8 @@ void MainWindow::on_Annulation_Liste_cellClicked(int row, int column)
     QStringList images = directory.entryList(QStringList() << "_HR_*.png",QDir::Files, QDir::Name | QDir::IgnoreCase);
     if (images.count() > 0)
     {
-        ui->Annulation_LabelPrevisualisation->setPixmap(QPixmap(QFileInfo(CheminTemp).filePath() + "/" + images[0]).scaled(ui->Annulation_LabelPrevisualisation->width()-10,ui->Annulation_LabelPrevisualisation->height() - 10,Qt::KeepAspectRatio,Qt::SmoothTransformation));
+        QPXpreview = QPixmap(QFileInfo(CheminTemp).filePath() + "/" + images[0]);
+        ui->Annulation_LabelPrevisualisation->setPixmap(QPXpreview.scaled(ui->Annulation_LabelPrevisualisation->width()-10,ui->Annulation_LabelPrevisualisation->height() - 10,Qt::KeepAspectRatio,Qt::SmoothTransformation));
         directory.remove(images[0]);
     }
 }
@@ -1394,7 +1223,7 @@ void MainWindow::on_Annulation_Bouton_Rien_clicked()
 ///
 void MainWindow::on_MainWindow_destroyed()
 {
-    qDebug() << "* MainWindow détruite";
+    Consigne("MainWindow détruite")
 }
 
 ///
@@ -1481,7 +1310,6 @@ void MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
     CodeTranche.append(ui->Folioter_Texte_Tranche7->text());
     CodeTranche.append(ui->Folioter_Texte_Tranche8->text());
     CodeTranche.append(ui->Folioter_Texte_Tranche9->text());
-#define MACRO_COLORtoDOUBLE(vecteur,tr) (double)vecteur[tr].redF(), (double)vecteur[tr].greenF(), (double)vecteur[tr].blueF()
     QString PropositionNomFichier = QFileInfo(PDFOuvert).path() + "/REE_" + ui->Folioter_Txt_RefREE->text() + "[" + ui->Folioter_Txt_IndiceREE->text() + "].pdf";
     PDFASauver = QFileDialog::getSaveFileName(this, "Enregistrer le fichier PDF",PropositionNomFichier,"Fichier PDF (*.pdf)");
     if (PDFASauver == "")
@@ -1528,6 +1356,7 @@ void MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
         constexpr double TamponPolice = 8;
         PdfError exPDFError;
 
+        Consigne("Démarrage de la génération des tampons...");
         for (int t = 0; t < 10; ++t) {
             progressLock.lock();
             iTranche = t;
@@ -1872,8 +1701,9 @@ void MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
                     PoDoFo::PdfPage* pPage = document.InsertPage(PoDoFo::PdfRect(0.0, 0.0, 595.0, 842.0), 0);
                     PoDoFo::PdfPainter painter;
                     painter.SetPage(pPage);
-                    /*int NBPageCree = */mPDGHelper.DrawOnPage_v2(painter, document);
+                    mPDGHelper.DrawOnPage_v2(painter, document);
                     painter.FinishPage();
+                    Consigne("Génération de la page de garde pour la tranche n°" + QString::number(t));
                 }
                 document.Write(PDFSortieTranche.toStdWString().c_str());
                 if (ui->OPT_Check_OuvrirApres->isChecked())
@@ -1882,13 +1712,13 @@ void MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
             }
             catch (const PoDoFo::PdfError& e)
             {
-                qDebug() << e.what();
-                //Erreur PODOFO e.what()
+                Consigne("Erreur à la génération du document : " + QString(e.what()) + " tranche n°" + QString::number(t));
             }
             catch (...)
             {
-                //Erreur inconnue
+                Consigne("Erreur inconnue à la génération du document tranche n°" + QString::number(t));
             }
+            Consigne("Génération de la procédure folioté pour la tranche n°" + QString::number(t));
         }//Fin du for i = 0 to 10
     });
     thread->start();
@@ -1918,6 +1748,7 @@ void MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
         ui->PDG_Texte_PDGEnCours->setText("");
     }
     ModeAjoutPDG = false;
+    Consigne("Fin de la génération des pages de gardes");
     QMessageBox::information(this,"Information", "Fin de la génération des pages de gardes");
 }
 
@@ -1934,9 +1765,7 @@ void MainWindow::on_Folioter_Btn_FoliotageAvecPDG_clicked()
     ui->tabWidget->setTabVisible(5,false);
     ui->tabWidget->setCurrentIndex(2);
     ui->PDG_ListeWidget->clear();
-    //ui->PDG_Texte_PDGEnCours->setText("");
     {
-        //ui->PDG_Texte_PDGEnCours->text(); //= (settings.value("REGLAGES/PDGutilise";
         bool TrouvePDG = false;
         //Test si ce nom est dans combo integré
         for (int var = 0; var < ui->PDG_Combo_Integre->count(); ++var) {
@@ -1969,12 +1798,12 @@ void MainWindow::on_Folioter_Btn_FoliotageAvecPDG_clicked()
                     ui->PDG_Combo_Integre->setCurrentIndex(var);
                     ui->PDG_Texte_PDGEnCours->setText(ui->PDG_Combo_Integre->itemText(var).toUpper());
                     ChargerPageDeGarde(ui->PDG_Combo_Integre->itemText(var),CheminPDGBase);
-                    TrouvePDG = true;
                     break;
                 }
             }
 
     }
+    Consigne("L'utilisateur doit choisir la page de garde à utiliser");
 }
 
 ///
@@ -1986,6 +1815,7 @@ void MainWindow::on_PDG_Btn_GenerePDF_clicked()
     if (ui->PDG_ListeWidget->count() == 0)
     {
         QMessageBox::warning(this, "REEMaker - Attention","La liste est vide ou aucune page de garde n'a été chargée.\nL'opération sera annulée.");
+        return;
     }
     if (ui->PDG_ListeWidget->count() > 0)
     {
@@ -2019,6 +1849,7 @@ void MainWindow::on_PDG_Btn_GenerePDF_clicked()
         QCoreApplication::processEvents();
         ui->Folioter_Btn_FoliotageSansPDG->setFocus();
         on_Folioter_Btn_FoliotageSansPDG_clicked();
+        Consigne("La page de garde est paramétrée, début du foliotage");
         return;
     }
 
@@ -2049,10 +1880,10 @@ void MainWindow::on_PDG_Btn_GenerePDF_clicked()
 
     QGridLayout *grid = new QGridLayout;
 
-//    Redéplacer un widget existant
-//        QLayoutItem * const item = grid->itemAt(1);//Label
-//        if(dynamic_cast<QWidgetItem *>(item))
-//            grid->addWidget(item->widget(), 0, 0, 1, 8);
+    //    Redéplacer un widget existant
+    //        QLayoutItem * const item = grid->itemAt(1);//Label
+    //        if(dynamic_cast<QWidgetItem *>(item))
+    //            grid->addWidget(item->widget(), 0, 0, 1, 8);
 
     Maingrid->addLayout(grid,0,0,1,2);
     grid->addWidget(Label0, row ,  column + 0, rowSpan, columnSpan + 9);
@@ -2181,6 +2012,7 @@ void MainWindow::on_PDG_Btn_GenerePDF_clicked()
             document.Write(QString(PDFASauver + "_Tr" + QString::number(valTranche) + ".pdf").toStdWString().c_str());
             if (ui->OPT_Check_OuvrirApres->isChecked())
                 QDesktopServices::openUrl(QUrl::fromLocalFile(QString(PDFASauver + "_Tr" + QString::number(valTranche) + ".pdf")));
+            Consigne("Génération de la page de garde pour la tranche n°" + QString::number(valTranche));
         }
     }
     if (msgBox.clickedButton() == pNon)
@@ -2327,13 +2159,14 @@ bool MainWindow::ChargerPageDeGarde(QString Nom, QString Chemin)
             }
             else
             {
-                qDebug() << "Pas normal";
+                Consigne("Erreur anormal...");
             }
         }
     } catch (...) {
         return false;
     }
-    return true;
+    Consigne("Page de garde '"+ Nom + "' chargée")
+            return true;
 }
 
 ///
@@ -2389,8 +2222,7 @@ void MainWindow::on_PDG_Btn_SauvegardePDGutilisateur_clicked()
                 ChargerPageDeGarde(ui->PDG_Combo_Utilisateur->itemText(DefautIndex),CheminPDGUtilisateur);
             }
         }
-
-
+        Consigne("Page de garde " + NomUtilisateur + " sauvegardée");
     }
 }
 
@@ -2416,7 +2248,6 @@ void MainWindow::on_PDG_Combo_Utilisateur_activated(int index)
     ChargerPageDeGarde(ui->PDG_Combo_Utilisateur->itemText(index),CheminPDGUtilisateur);
 }
 
-
 ///
 /// \brief MainWindow::on_EDIT_Bouton_OuvrirPDG_clicked
 /// Ouvre une page de garde pour édition
@@ -2428,6 +2259,7 @@ void MainWindow::on_EDIT_Bouton_OuvrirPDG_clicked()
         return;
     ChargePDG(PDGOuvertePourEdition);
     ui->tabWidget->setTabText(4,QString("Edition de page de gardes - %1").arg(QFileInfo(PDGOuvertePourEdition).baseName()));
+    Consigne("Page de garde " + PDGOuvertePourEdition + " ouverte pour édition");
 }
 
 ///
@@ -2441,6 +2273,7 @@ void MainWindow::on_EDIT_Bouton_NouvellePDG_clicked()
     ui->EDIT_Liste->clear();
     ui->EDIT_Liste->setUpdatesEnabled(true);
     PDGOuvertePourEdition = "";
+    Consigne("Démarrage d'une nouvelle page de garde");
 }
 
 ///
@@ -2451,7 +2284,11 @@ void MainWindow::on_EDIT_Bouton_EnregistrePDG_clicked()
 {
     if (PDGOuvertePourEdition == "")
         on_EDIT_Bouton_EnregistrePDGSous_clicked();
-    SauvePDG(PDGOuvertePourEdition);
+    else
+    {
+        SauvePDG(PDGOuvertePourEdition);
+        Consigne("Page de garde " + PDGOuvertePourEdition + " écrasée");
+    }
 }
 
 ///
@@ -2464,7 +2301,10 @@ void MainWindow::on_EDIT_Bouton_EnregistrePDGSous_clicked()
     if (PDFASauver == "")
         return;
     if(SauvePDG(PDFASauver))
+    {
         PDGOuvertePourEdition = PDFASauver;
+        Consigne("Page de garde " + PDGOuvertePourEdition + " créée sur disque");
+    }
 }
 
 ///
@@ -2511,7 +2351,7 @@ void MainWindow::on_EDIT_Bouton_Ligne_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
-
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 ///
 /// \brief MainWindow::on_EDIT_Bouton_RectVide_clicked
@@ -2533,6 +2373,7 @@ void MainWindow::on_EDIT_Bouton_RectVide_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2555,6 +2396,7 @@ void MainWindow::on_EDIT_Bouton_RectGrille_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2578,6 +2420,7 @@ void MainWindow::on_EDIT_Bouton_RectRemplis_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2602,6 +2445,7 @@ void MainWindow::on_EDIT_Bouton_Texte_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2626,6 +2470,7 @@ void MainWindow::on_EDIT_Bouton_TexteMulti_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2650,7 +2495,7 @@ void MainWindow::on_EDIT_Bouton_TexteQuestion_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
-
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2675,7 +2520,7 @@ void MainWindow::on_EDIT_Bouton_TexteMultiQuestion_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
-
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2698,6 +2543,7 @@ void MainWindow::on_EDIT_Bouton_Checkbox_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2720,6 +2566,7 @@ void MainWindow::on_EDIT_Bouton_CheckboxQeustion_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2742,6 +2589,7 @@ void MainWindow::on_EDIT_Bouton_MultiCheckboxQuestion_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2764,6 +2612,7 @@ void MainWindow::on_EDIT_Bouton_InsereImage_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2785,6 +2634,7 @@ void MainWindow::on_EDIT_Bouton_PageSuivante_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
 ///
@@ -2806,6 +2656,7 @@ void MainWindow::on_EDIT_Bouton_Commentaire_clicked()
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
     ui->EDIT_Liste->setUpdatesEnabled(true);
+    Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 ///
 /// \brief MainWindow::on_Edit_Bouton_OutilCouleur_clicked
@@ -3903,6 +3754,7 @@ bool MainWindow::SauvePDG(QString FichierSortie)
 void MainWindow::on_APROPOS_Texte_anchorClicked(const QUrl &arg1)
 {
     QDesktopServices::openUrl(arg1);
+    Consigne("Ouverture du lien  " + arg1.toDisplayString(QUrl::None));
 }
 
 ///
@@ -3969,9 +3821,9 @@ MainWindow::ValeurRetour MainWindow::RepareGhostScript(QString FichierSource, qi
     env.insert("GS_FONTPATH", Windir + "\\fonts");
     procGhost->setProcessEnvironment(env);
     QString ConstructedArguments = QString("-dBATCH -dNOPAUSE -dSHORTERRORS -sDEVICE=pdfwrite %4 -I\"%1\" -sOutputFile=\"%2\" \"%3\"")
-            .arg(QDir::toNativeSeparators(CheminBaseGhostScript) + "resource\\init"
-                 ,QDir::toNativeSeparators(FichierSource)
-                 ,QDir::toNativeSeparators(FichierBKUP),
+            .arg(CheminBaseGhostScript + "resource/init"
+                 ,FichierSource
+                 ,FichierBKUP,
                  Downsample?"-dColorConversionStrategy=/LeaveColorUnchanged -dDownsampleMonoImages=false -dDownsampleGrayImages=false -dDownsampleColorImages=false -dAutoFilterColorImages=false -dAutoFilterGrayImages=false -dColorImageFilter=/FlateEncode -dGrayImageFilter=/FlateEncode":"");
     procGhost->setNativeArguments(ConstructedArguments);
     procGhost->start(CheminBaseGhostScript + "bin/gswin64c.exe");
@@ -4017,13 +3869,19 @@ MainWindow::ValeurRetour MainWindow::RepareGhostScript(QString FichierSource, qi
 qint16 MainWindow::PDFInfoNombrePage(QString FichierSource)
 {
     QString CheminPDFINFO = QCoreApplication::applicationDirPath() + "/PdfToPPM/pdfinfo.exe";
+    MiseEnPlaceListInfo();
+
     if (!QFile::exists(CheminPDFINFO))
+    {
         return -1;
+    }
     if (FichierSource == "")
+    {
         return -1;
+    }
 
     QProcess* procPDFINFO = new QProcess();
-    procPDFINFO->setArguments({QDir::toNativeSeparators(FichierSource)});
+    procPDFINFO->setArguments({"-isodates", FichierSource});
     procPDFINFO->setProgram(CheminPDFINFO);
 
     procPDFINFO->start();
@@ -4034,7 +3892,6 @@ qint16 MainWindow::PDFInfoNombrePage(QString FichierSource)
     }
 
     qint16 NombrePage = -1;
-
     auto Lecture = QString(procPDFINFO->readAllStandardOutput()).split("\n",Qt::SkipEmptyParts);
     if (Lecture.count()> 0)
     {
@@ -4050,8 +3907,78 @@ qint16 MainWindow::PDFInfoNombrePage(QString FichierSource)
         }
     }
     else
+    {
+        Lecture.prepend("Erreur à l'ouverture du fichier PDF");
+        ui->FolioListeINFO->addItems(Lecture);
         return -1;
+    }
     procPDFINFO->close();
+    QStringList qslOriginal =
+    {
+        "Author:",
+        "Creator:",
+        "Producer:",
+        "CreationDate:",
+        "ModDate:",
+        "Custom Metadata:",
+        "Metadata Stream:",
+        "Tagged:",
+        "UserProperties:",
+        "Suspects:",
+        "Form:",
+        "JavaScript:",
+        "Pages:",
+        "Encrypted:",
+        "Page size:",
+        "Page rot:",
+        "File size:",
+        "Optimized:",
+        "PDF version:"
+    };
+    QStringList qslCorrige =
+    {
+        "Auteur                : ",
+        "Créateur              : ",
+        "Producteur            : ",
+        "Date création         : ",
+        "Date modification     : ",
+        "Métadata personnalisé : ",
+        "Flux de métadata      : ",
+        "Taggé                 : ",
+        "Propriété utilisateur : ",
+        "Tag suspect           : ",
+        "Formulaire            : ",
+        "JavaScript            : ",
+        "Pages                 : ",
+        "Cryptée               : ",
+        "Taille de la page     : ",
+        "Rotation de la page   : ",
+        "Taille du fichier     : ",
+        "PDF optimisé          : ",
+        "Version PDF           : "
+    };
+    for (int var = 0; var < Lecture.count(); ++var)
+    {
+        for (int index = 0; index < qslCorrige.count(); ++index)
+            if (Lecture[var].startsWith(qslOriginal[index]))
+                Lecture[var] = qslCorrige[index] + Lecture[var].mid(qslOriginal[index].length()).trimmed();
+        if (Lecture[var].endsWith("none"))
+            Lecture[var] = Lecture[var].left(Lecture[var].length()-4) + "aucun";
+        if (Lecture[var].endsWith("no"))
+            Lecture[var] = Lecture[var].left(Lecture[var].length()-2) + "non";
+        if (Lecture[var].endsWith("yes"))
+            Lecture[var] = Lecture[var].left(Lecture[var].length()-3) + "oui";
+        if (Lecture[var].endsWith("bytes"))
+            Lecture[var] = Lecture[var].left(Lecture[var].length()-5) + "octets";
+        if (Lecture[var].startsWith(qslCorrige[3]) || Lecture[var].startsWith(qslCorrige[4]))//Mise en forme des dates
+        {
+            if (Lecture[var].mid(34,1) == "T")
+                Lecture[var] = Lecture[var].replace(34,1,' ');
+            if (Lecture[var].endsWith("+01"))
+                Lecture[var] = Lecture[var].chopped(3);
+        }
+    }
+    ui->FolioListeINFO->addItems(Lecture);
     return NombrePage;
 }
 
@@ -4125,7 +4052,7 @@ bool MainWindow::CheckIntegrite()
         "qt6gui.dll",
         "qt6widgets.dll",
         "reemaker.exe",
-        "reemaker.ini",
+        "7za.exe",
         "REEMakerAide.pdf",
         "zlib1.dll",
         "ghostscript/bin/gsdll64.dll",
@@ -4697,6 +4624,9 @@ bool MainWindow::CheckIntegrite()
         "platforms/qminimal.dll",
         "platforms/qoffscreen.dll",
         "platforms/qwindows.dll",
+        "plugins/tls/qcertonlybackend.dll",
+        "plugins/tls/qopensslbackend.dll",
+        "plugins/tls/qschannelbackend.dll",
         "police/roboto-bold.ttf",
         "police/roboto-bolditalic.ttf",
         "police/roboto-italic.ttf",
@@ -4717,8 +4647,17 @@ bool MainWindow::CheckIntegrite()
             Resultat.append(QString("Le fichier %1 est présent mais de taille nulle").arg(Fichier));
     }
     if (Resultat.count()>0)
+    {
         MACRO_MSG("Un ou plusieurs fichiers sont manquants ou corrompus",QString("L'application est susceptible de dysfonctionner pour les raisons suivantes :\n\n%1\n\nLa réinstallation de l'application est recommandée").arg(Resultat.join("\n")));
-    return true;
+        Consigne("Erreur lors du contrôle d'intégrité, un ou plusieurs fichiers sont manquants ou corrompus");
+        Consigne("Voici les fichiers concernés :");
+        foreach (auto Fichier, Resultat)
+            Consigne(" " + Fichier);
+        Consigne("Voici les fichiers concernés :");
+    }
+    else
+        Consigne("Les fichiers présents ne sont pas corrompus, REEMaker peut fonctionner correctement.")
+                return true;
 }
 
 ///
@@ -4828,6 +4767,9 @@ void MainWindow::BasculerClairSombre()
     }
 }
 
+///
+/// \brief MainWindow::on_PDG_Btn_SupprimePDGUtilisateur_clicked
+/// Suppression de la page de garde sélectionnée
 void MainWindow::on_PDG_Btn_SupprimePDGUtilisateur_clicked()
 {
     if (ui->PDG_Combo_Utilisateur->count() == 0)
@@ -4847,8 +4789,440 @@ void MainWindow::on_PDG_Btn_SupprimePDGUtilisateur_clicked()
     if(mBox.clickedButton() == pButtonOK)
     {
         QFile::remove(CheminPDGUtilisateur + ui->PDG_Combo_Utilisateur->currentText() + ".txt");
+        Consigne("Suppression de la page de garde utilisateur '" + ui->PDG_Combo_Utilisateur->currentText() + "'");
         ui->PDG_Combo_Utilisateur->removeItem(ui->PDG_Combo_Utilisateur->currentIndex());
         ui->PDG_ListeWidget->clear();
     }
 }
 
+///
+/// \brief MainWindow::LectureINI
+///Lecture des paramètres utilisateurs
+void MainWindow::LectureINI()
+{// Fichier INI
+    QSettings settings(QCoreApplication::applicationDirPath() + "/REEMAKER.ini", QSettings::IniFormat);
+    ThemeDark = settings.value("REGLAGES/ThemeSombre","false").toBool();
+    ui->Folioter_Txt_NomDuSite->setText(settings.value("REGLAGES/TAMPON_NomDuSite","").toString());
+    ui->Folioter_Txt_RefREE->setText(settings.value("REGLAGES/TAMPON_ReferenceREE","").toString());
+    ui->Folioter_Txt_IndiceREE->setText(settings.value("REGLAGES/TAMPON_Indice","").toString());
+    ui->Folioter_Spin_PremierePage->setValue(settings.value("REGLAGES/Folio_premier_numero","3").toInt());
+    ui->Folioter_Texte_Tranche0->setText(settings.value("REGLAGES/CycleTranche0","").toString());
+    ui->Folioter_Texte_Tranche1->setText(settings.value("REGLAGES/CycleTranche1","").toString());
+    ui->Folioter_Texte_Tranche2->setText(settings.value("REGLAGES/CycleTranche2","").toString());
+    ui->Folioter_Texte_Tranche3->setText(settings.value("REGLAGES/CycleTranche3","").toString());
+    ui->Folioter_Texte_Tranche4->setText(settings.value("REGLAGES/CycleTranche4","").toString());
+    ui->Folioter_Texte_Tranche5->setText(settings.value("REGLAGES/CycleTranche5","").toString());
+    ui->Folioter_Texte_Tranche6->setText(settings.value("REGLAGES/CycleTranche6","").toString());
+    ui->Folioter_Texte_Tranche7->setText(settings.value("REGLAGES/CycleTranche7","").toString());
+    ui->Folioter_Texte_Tranche8->setText(settings.value("REGLAGES/CycleTranche8","").toString());
+    ui->Folioter_Texte_Tranche9->setText(settings.value("REGLAGES/CycleTranche9","").toString());
+    ui->PDG_Texte_PDGEnCours->setText(settings.value("REGLAGES/PDGutilise","page de garde standard BPA").toString().toUpper());
+    ui->OPT_BText_CoulTranche_0->setText(settings.value("REGLAGES/CouleurTampon0","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_1->setText(settings.value("REGLAGES/CouleurTampon1","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_2->setText(settings.value("REGLAGES/CouleurTampon2","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_3->setText(settings.value("REGLAGES/CouleurTampon3","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_4->setText(settings.value("REGLAGES/CouleurTampon4","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_5->setText(settings.value("REGLAGES/CouleurTampon5","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_6->setText(settings.value("REGLAGES/CouleurTampon6","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_7->setText(settings.value("REGLAGES/CouleurTampon7","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_8->setText(settings.value("REGLAGES/CouleurTampon8","#0000FF").toString());
+    ui->OPT_BText_CoulTranche_9->setText(settings.value("REGLAGES/CouleurTampon9","#0000FF").toString());
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_0,ui->OPT_Btn_ColTranche0);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_1,ui->OPT_Btn_ColTranche1);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_2,ui->OPT_Btn_ColTranche2);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_3,ui->OPT_Btn_ColTranche3);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_4,ui->OPT_Btn_ColTranche4);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_5,ui->OPT_Btn_ColTranche5);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_6,ui->OPT_Btn_ColTranche6);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_7,ui->OPT_Btn_ColTranche7);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_8,ui->OPT_Btn_ColTranche8);
+    COLORfromTEXT(ui->OPT_BText_CoulTranche_9,ui->OPT_Btn_ColTranche9);
+    ui->OPT_BText_CoulAccent_0->setText(settings.value("REGLAGES/CouleurAccent0","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_1->setText(settings.value("REGLAGES/CouleurAccent1","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_2->setText(settings.value("REGLAGES/CouleurAccent2","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_3->setText(settings.value("REGLAGES/CouleurAccent3","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_4->setText(settings.value("REGLAGES/CouleurAccent4","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_5->setText(settings.value("REGLAGES/CouleurAccent5","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_6->setText(settings.value("REGLAGES/CouleurAccent6","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_7->setText(settings.value("REGLAGES/CouleurAccent7","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_8->setText(settings.value("REGLAGES/CouleurAccent8","#E8E8E8").toString());
+    ui->OPT_BText_CoulAccent_9->setText(settings.value("REGLAGES/CouleurAccent9","#E8E8E8").toString());
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_0,ui->OPT_Btn_ColAccent0);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_1,ui->OPT_Btn_ColAccent1);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_2,ui->OPT_Btn_ColAccent2);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_3,ui->OPT_Btn_ColAccent3);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_4,ui->OPT_Btn_ColAccent4);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_5,ui->OPT_Btn_ColAccent5);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_6,ui->OPT_Btn_ColAccent6);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_7,ui->OPT_Btn_ColAccent7);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_8,ui->OPT_Btn_ColAccent8);
+    COLORfromTEXT(ui->OPT_BText_CoulAccent_9,ui->OPT_Btn_ColAccent9);
+    qint16 Emplacement = settings.value("REGLAGES/EmplacementTampon","0").toInt();
+    if (Emplacement == 0)
+        ui->OPT_Radio_HG->setChecked(true);
+    if (Emplacement == 1)
+        ui->OPT_Radio_HD->setChecked(true);
+    if (Emplacement == 2)
+        ui->OPT_Radio_BG->setChecked(true);
+    if (Emplacement == 3)
+        ui->OPT_Radio_BD->setChecked(true);
+    ui->OPT_Check_OuvrirApres->setChecked(settings.value("REGLAGES/OuvrirApres",true).toBool());
+    ui->OPT_Check_GhostScript->setChecked(settings.value("REGLAGES/Reparer",true).toBool());
+    ui->OPT_Spin_Largeur->setValue(settings.value("REGLAGES/MargeLateral","20").toInt());
+    ui->OPT_Spin_Hauteur->setValue(settings.value("REGLAGES/MargeVertical","20").toInt());
+    ui->OPT_Spin_ResolutionDPI->setValue(settings.value("REGLAGES/ResolutionDPI","40").toInt());
+    ui->OPT_Text_FolioAnnule->setText(settings.value("REGLAGES/FolioAnnule","Folio annulé").toString());
+    PDGManuelNomSite = settings.value("REGLAGES/MANUEL_NomDuSite","").toString();
+    PDGManuelRefREE = settings.value("REGLAGES/MANUEL_ReferenceREE","").toString();
+    PDGManuelIndice = settings.value("REGLAGES/MANUEL_Indice","").toString();
+    Consigne("Fichier de paramètre pris en compte");
+}
+///
+/// \brief MainWindow::MiseEnPlaceChemin
+///Mise en place des dossiers des applications, temporaires et de la police temporaire
+void MainWindow::MiseEnPlaceChemin()
+{
+    CheminPoppler = QCoreApplication::applicationDirPath() + "/PdfToPPM/pdftoppm.exe";
+    CheminGhostScript = QCoreApplication::applicationDirPath() + "/GhostScript/BatchGhostScript.bat";
+    CheminPDGUtilisateur = QCoreApplication::applicationDirPath() + "/PDG_utilisateur/";
+    {
+        QDir directory(QFileInfo(CheminPDGUtilisateur).filePath());
+        QStringList lstPDGBase = directory.entryList(QStringList() << "*.txt",QDir::Files, QDir::Name | QDir::IgnoreCase);
+        foreach (QString lPDG, lstPDGBase) {
+            ui->PDG_Combo_Utilisateur->addItem(QFileInfo(CheminPDGUtilisateur + lPDG).baseName());
+        }
+    }
+    CheminPDGBase = QCoreApplication::applicationDirPath() + "/PDG_modele/";
+    {
+        QDir directory(QFileInfo(CheminPDGBase).filePath());
+        QStringList lstPDGBase = directory.entryList(QStringList() << "*.txt",QDir::Files, QDir::Name | QDir::IgnoreCase);
+        int DefautIndex = -1;
+        foreach (QString lPDG, lstPDGBase) {
+            ui->PDG_Combo_Integre->addItem(QFileInfo(CheminPDGBase + lPDG).baseName());
+            if (lPDG.toLower() == "page de garde standard bpa.txt") //On sait que cette PageDeGarde est la : page de garde standard BPA.txt
+                DefautIndex = ui->PDG_Combo_Integre->count()-1;
+        }
+        if (DefautIndex != -1)
+        {
+            ui->PDG_Combo_Integre->setCurrentIndex(DefautIndex);
+        }
+    }
+    {
+        bool TrouvePDG = false;
+        //Test si ce nom est dans combo integré
+        for (int var = 0; var < ui->PDG_Combo_Integre->count(); ++var) {
+            if(ui->PDG_Combo_Integre->itemText(var).toUpper() == ui->PDG_Texte_PDGEnCours->text().toUpper())
+            {
+                ui->PDG_Combo_Integre->setCurrentIndex(var);
+                ui->PDG_Texte_PDGEnCours->setText(ui->PDG_Combo_Integre->itemText(var).toUpper());
+                ChargerPageDeGarde(ui->PDG_Combo_Integre->itemText(var),CheminPDGBase);
+                TrouvePDG = true;
+                break;
+            }
+        }
+        //Test si ce nom est dans Combo utilisateur
+        if (!TrouvePDG)
+            for (int var = 0; var < ui->PDG_Combo_Utilisateur->count(); ++var) {
+                if(ui->PDG_Combo_Utilisateur->itemText(var).toUpper() == ui->PDG_Texte_PDGEnCours->text().toUpper())
+                {
+                    ui->PDG_Combo_Utilisateur->setCurrentIndex(var);
+                    ui->PDG_Texte_PDGEnCours->setText(ui->PDG_Combo_Utilisateur->itemText(var).toUpper());
+                    ChargerPageDeGarde(ui->PDG_Combo_Utilisateur->itemText(var),CheminPDGUtilisateur);
+                    TrouvePDG = true;
+                    break;
+                }
+            }
+        //Aucun, on le reset
+        if (!TrouvePDG)
+            for (int var = 0; var < ui->PDG_Combo_Integre->count(); ++var) {
+                if(ui->PDG_Combo_Integre->itemText(var).toLower() == "page de garde standard bpa")
+                {
+                    ui->PDG_Combo_Integre->setCurrentIndex(var);
+                    ui->PDG_Texte_PDGEnCours->setText(ui->PDG_Combo_Integre->itemText(var).toUpper());
+                    ChargerPageDeGarde(ui->PDG_Combo_Integre->itemText(var),CheminPDGBase);
+                    break;
+                }
+            }
+
+    }
+    QString RANDOM = QUuid::createUuid().toString();
+    RANDOM.remove(QRegularExpression("{|}|-")); // Seulement les caractères en hexa
+    CheminTemp = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/REEMAKER_" + RANDOM;
+    QDir().mkpath(CheminTemp);
+    TempTamponRoboto = CheminTemp + "/Roboto-Regular.ttf";
+    QFile::copy(QCoreApplication::applicationDirPath() + "/Police/Roboto-Regular.ttf",TempTamponRoboto);
+    //TempTamponRobotoMono = CheminTemp + "/robotomono-Regular.ttf";
+    //QFile::copy(QCoreApplication::applicationDirPath() + "/Police/robotomono-Regular.ttf",TempTamponRobotoMono);
+
+    //Lecture de la font en mémoire (QByteArray
+    QFile file(QCoreApplication::applicationDirPath() + "/Police/robotomono-Regular.ttf");
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QByteArray blobFont = file.readAll();
+        QFontDatabase::addApplicationFontFromData(blobFont);
+        file.close();
+    }
+}
+
+///
+/// \brief MainWindow::SauveINI
+///Sauvegarde des paramètres utilisateurs
+void MainWindow::SauveINI()
+{
+    QSettings settings(QCoreApplication::applicationDirPath() + "/REEMAKER.ini", QSettings::IniFormat);// Création du fichier en précisant que l'on travaille avec un fichier de format INI.
+    settings.beginGroup("REGLAGES");
+
+    settings.setValue("TAMPON_NomDuSite", ui->Folioter_Txt_NomDuSite->text());
+    settings.setValue("TAMPON_ReferenceREE", ui->Folioter_Txt_RefREE->text());
+    settings.setValue("TAMPON_Indice", ui->Folioter_Txt_IndiceREE->text());
+    settings.setValue("Folio_premier_numero", ui->Folioter_Spin_PremierePage->value());
+
+    settings.setValue("CycleTranche0", ui->Folioter_Texte_Tranche0->text());
+    settings.setValue("CycleTranche1", ui->Folioter_Texte_Tranche1->text());
+    settings.setValue("CycleTranche2", ui->Folioter_Texte_Tranche2->text());
+    settings.setValue("CycleTranche3", ui->Folioter_Texte_Tranche3->text());
+    settings.setValue("CycleTranche4", ui->Folioter_Texte_Tranche4->text());
+    settings.setValue("CycleTranche5", ui->Folioter_Texte_Tranche5->text());
+    settings.setValue("CycleTranche6", ui->Folioter_Texte_Tranche6->text());
+    settings.setValue("CycleTranche7", ui->Folioter_Texte_Tranche7->text());
+    settings.setValue("CycleTranche8", ui->Folioter_Texte_Tranche8->text());
+    settings.setValue("CycleTranche9", ui->Folioter_Texte_Tranche9->text());
+
+    settings.setValue("PDGutilise", ui->PDG_Texte_PDGEnCours->text());
+
+    settings.setValue("CouleurTampon0", ui->OPT_BText_CoulTranche_0->text());
+    settings.setValue("CouleurTampon1", ui->OPT_BText_CoulTranche_1->text());
+    settings.setValue("CouleurTampon2", ui->OPT_BText_CoulTranche_2->text());
+    settings.setValue("CouleurTampon3", ui->OPT_BText_CoulTranche_3->text());
+    settings.setValue("CouleurTampon4", ui->OPT_BText_CoulTranche_4->text());
+    settings.setValue("CouleurTampon5", ui->OPT_BText_CoulTranche_5->text());
+    settings.setValue("CouleurTampon6", ui->OPT_BText_CoulTranche_6->text());
+    settings.setValue("CouleurTampon7", ui->OPT_BText_CoulTranche_7->text());
+    settings.setValue("CouleurTampon8", ui->OPT_BText_CoulTranche_8->text());
+    settings.setValue("CouleurTampon9", ui->OPT_BText_CoulTranche_9->text());
+
+    settings.setValue("CouleurAccent0", ui->OPT_BText_CoulAccent_0->text());
+    settings.setValue("CouleurAccent1", ui->OPT_BText_CoulAccent_1->text());
+    settings.setValue("CouleurAccent2", ui->OPT_BText_CoulAccent_2->text());
+    settings.setValue("CouleurAccent3", ui->OPT_BText_CoulAccent_3->text());
+    settings.setValue("CouleurAccent4", ui->OPT_BText_CoulAccent_4->text());
+    settings.setValue("CouleurAccent5", ui->OPT_BText_CoulAccent_5->text());
+    settings.setValue("CouleurAccent6", ui->OPT_BText_CoulAccent_6->text());
+    settings.setValue("CouleurAccent7", ui->OPT_BText_CoulAccent_7->text());
+    settings.setValue("CouleurAccent8", ui->OPT_BText_CoulAccent_8->text());
+    settings.setValue("CouleurAccent9", ui->OPT_BText_CoulAccent_9->text());
+
+    if (ui->OPT_Radio_HG->isChecked())
+        settings.setValue("EmplacementTampon", 0);
+    if (ui->OPT_Radio_HD->isChecked())
+        settings.setValue("EmplacementTampon", 1);
+    if (ui->OPT_Radio_BG->isChecked())
+        settings.setValue("EmplacementTampon", 2);
+    if (ui->OPT_Radio_BD->isChecked())
+        settings.setValue("EmplacementTampon", 3);
+
+    settings.setValue("OuvrirApres", ui->OPT_Check_OuvrirApres->isChecked());
+    settings.setValue("Reparer", ui->OPT_Check_GhostScript->isChecked());
+    settings.setValue("MargeLateral", ui->OPT_Spin_Largeur->value());
+    settings.setValue("MargeVertical", ui->OPT_Spin_Hauteur->value());
+    settings.setValue("ResolutionDPI", ui->OPT_Spin_ResolutionDPI->value());
+    settings.setValue("FolioAnnule", ui->OPT_Text_FolioAnnule->text());
+    settings.setValue("ThemeSombre", ThemeDark);
+    settings.setValue("REGLAGES/MANUEL_NomDuSite", PDGManuelNomSite);
+    settings.setValue("REGLAGES/MANUEL_ReferenceREE", PDGManuelRefREE);
+    settings.setValue("REGLAGES/MANUEL_Indice", PDGManuelIndice);
+    settings.endGroup();
+    Consigne("Fichier de paramètre enregistré");
+
+}
+
+///
+/// \brief MainWindow::MiseEnPlaceValidator
+/// Mise en place des validators pour écrire en majuscule
+void MainWindow::MiseEnPlaceValidator()
+{
+    validUPPER = new MyValidatorUPPER(this);
+    ui->Folioter_Txt_NomDuSite->setValidator(validUPPER);
+    ui->Folioter_Txt_RefREE->setValidator(validUPPER);
+    ui->Folioter_Txt_IndiceREE->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche0->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche1->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche2->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche3->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche4->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche5->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche6->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche7->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche8->setValidator(validUPPER);
+    ui->Folioter_Texte_Tranche9->setValidator(validUPPER);
+}
+///
+/// \brief MainWindow::MiseEnPlaceInterface
+/// Mise en place de l'interface
+void MainWindow::MiseEnPlaceInterface()
+{
+    mVersion = GetVersion(qApp->arguments()[0]);
+    this->setWindowTitle(QString("REEMaker Version %1").arg(mVersion));
+    ui->APROPOS_Texte->document()->setHtml(ui->APROPOS_Texte->document()->toHtml().replace("%VERSION%",mVersion));
+    QTextCursor textCursor = ui->APROPOS_Texte->textCursor();
+    textCursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
+    ui->APROPOS_Texte->setTextCursor(textCursor); // The line to add
+
+    ClairSombreAction = ui->menubar->addAction("Basculer entre le &mode clair et sombre");
+    connect(ClairSombreAction, SIGNAL(triggered()), this, SLOT(BasculerClairSombre()));
+    ui->menubar->addSeparator();
+    AfficheEditAction = ui->menubar->addAction("Basculer vers l'&Editeur de page de garde");
+    connect(AfficheEditAction, SIGNAL(triggered()), this, SLOT(AfficheEditeurPDG()));
+    ui->menubar->addSeparator();
+    helpAction = ui->menubar->addAction("&Afficher l'aide");
+    connect(helpAction, SIGNAL(triggered()), this, SLOT(AfficheAide()));
+
+    ui->Folioter_Group_RefTampon->setVisible(false);
+    ui->Folioter_Group_Etendue->setVisible(false);
+    ui->Folioter_Group_Annuler->setVisible(false);
+    ui->Folioter_Group_ChoixTranche->setVisible(false);
+    ui->Folioter_Btn_EtapeSuivante1->setEnabled(false);
+    ui->Folioter_Btn_EtapeSuivante2->setEnabled(false);
+    ui->tabWidget->setTabVisible(1,false);
+    ui->Annulation_Liste->setColumnCount(2);
+    ui->Annulation_Liste->setRowCount(0);
+    ui->Annulation_Liste->setColumnWidth(0,20);
+    ui->Annulation_Liste->setColumnWidth(1,160);
+    ui->EDIT_Liste->setSortingEnabled(false);
+    ui->tabWidget->setCurrentIndex(0);
+    ui->tabWidget->setTabVisible(4,false);
+    if (ThemeDark)
+        ui->APROPOS_Texte->setStyleSheet("a {color: white; }");
+}
+void MainWindow::MiseEnPlaceListInfo()
+{   // Réglage initial de la police monospace pour garder une dimension fixe
+    fontList = ui->FolioListeINFO->font();
+    if (fontList.family() != "Roboto Mono")
+        fontList.setPointSize(fontList.pointSize()-/*1*/0/*1 fait trop petit*/);
+    fontList.setFamily("Roboto Mono");
+    //Ajout de la police de LOG
+    ui->listLOG->setFont(fontList);
+    //Ajout de la première ligne de Info PDF
+    ui->FolioListeINFO->setFont(fontList);
+    ui->FolioListeINFO->clear();
+    QLabel *mLabel = new QLabel(this);
+    mLabel->setText("Information sur le fichier PDF");
+    QFont font = fontList;
+    font.setBold(true);
+    font.setUnderline(true);
+    mLabel->setFont(font);
+    ui->FolioListeINFO->setUpdatesEnabled(false);
+    QListWidgetItem* item;
+    item = new QListWidgetItem(ui->FolioListeINFO);
+    ui->FolioListeINFO->addItem(item);
+    item->setSizeHint(mLabel->minimumSizeHint());
+    ui->FolioListeINFO->setItemWidget(item, mLabel);
+    ui->FolioListeINFO->setUpdatesEnabled(true);
+}
+
+void MainWindow::on_FolioListeINFO_customContextMenuRequested(const QPoint &pos)
+{
+    Q_UNUSED(pos);
+    QMenu *menu=new QMenu(this);
+
+    menu->addAction(QString("Information PDF").arg(QString::number(mPressePapier->Taille())));
+    menu->addSeparator();
+    menu->addAction(QIcon(":/Copier"), QString(" Copier cette ligne dans le presse-papier"),this,[&](bool){
+        QApplication::clipboard()->setText(ui->FolioListeINFO->currentItem()->text());
+    });
+    menu->actions()[0]->setEnabled(false);
+    menu->popup(this->mapTo(this,QCursor::pos()));
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    if (ui->tabWidget->currentIndex() == 1)
+        if (!QPXpreview.isNull())
+            ui->Annulation_LabelPrevisualisation->setPixmap(
+                        QPXpreview.scaled(ui->Annulation_LabelPrevisualisation->width()-10,
+                                          ui->Annulation_LabelPrevisualisation->height() - 10,
+                                          Qt::KeepAspectRatio,Qt::SmoothTransformation));
+
+}
+
+QString MainWindow::DerniereVersion()
+{
+    bool timeout;
+    QTimer* timer = new QTimer();
+    connect(timer, &QTimer::timeout, this, [&](){
+        timeout = true;
+    });
+    QUrl url("https://api.github.com/repos/alwendya/REEMakerQT/tags");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    QNetworkAccessManager nam;
+    QNetworkReply * reply = nam.get(request);
+
+    timeout=false;
+    timer->start(5000);
+
+    while(!timeout){
+        qApp->processEvents();
+        if(reply->isFinished()) break;
+    }
+
+    if(reply->isFinished()){
+        QByteArray response_data = reply->readAll();
+        QJsonDocument json = QJsonDocument::fromJson(response_data);
+        return json[0]["name"].toString();
+    }else{
+        return QString("Timeout");
+    }
+}
+void MainWindow::DemarreLeTelechargement(QUrl updateUrl)
+{
+    HttpDownload* myDownloader = new HttpDownload(nullptr);
+    auto Initialisation = myDownloader->DemarreTelechargement(updateUrl,QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/update.REEMaker.7z","Mise à jour de REEMaker");
+    if (Initialisation != HttpDownload::StatutDemarrage::TelechargementDemarre)
+    {
+        if (Initialisation == HttpDownload::StatutDemarrage::ErreurCreationFichierDestination)
+            Consigne("Erreur au démarrage du téléchargement : Impossible d'écrire sur disque le fichier téléchargé");
+        if (Initialisation == HttpDownload::StatutDemarrage::AbandonFichierDestinationExistant)
+            Consigne("Erreur au démarrage du téléchargement : Le fichier destination existe déjà, l'utilisateur à choisi de ne pas l'écraser");
+        if (Initialisation == HttpDownload::StatutDemarrage::PasDeDestination)
+            Consigne("Erreur au démarrage du téléchargement : Chemin de destination non renseigné");
+        if (Initialisation == HttpDownload::StatutDemarrage::PasDeSource)
+            Consigne("Erreur au démarrage du téléchargement : URL source non renseigné");
+    }
+    else
+    {
+        while (true)
+        {
+            QThread::msleep(250);
+            QCoreApplication::processEvents();
+            auto Statut = myDownloader->RetourneStatut();
+
+            if (Statut == HttpDownload::EtatFinTelechargement::EnCours)
+                qDebug().noquote().nospace() << "C'est normal, sa tourne...";
+            if (Statut == HttpDownload::EtatFinTelechargement::AbandonnerParUtilisateur)
+            {
+                Consigne("Opération abandonner par l'utilisateur");
+                break;
+            }
+            if (Statut == HttpDownload::EtatFinTelechargement::ErreurDeTelechargement)
+            {
+                Consigne("Erreur inconnue au téléchargement...");
+                break;
+            }
+            if (Statut == HttpDownload::EtatFinTelechargement::TermineSansErreur)
+            {
+                Consigne("Le téléchargement de la mise à jour à réussi, décompression et msie en place...");
+                QStringList Operations;
+                Operations << QString(" & \"%1\" e -y \"%2\" -o\"%3\"").arg(QDir::toNativeSeparators(QCoreApplication::applicationDirPath() + "/7za.exe"),
+                                                                            QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/update.REEMaker.7z"),
+                                                                            QDir::toNativeSeparators(QCoreApplication::applicationDirPath()));
+                Operations << QString(" & \"%1\"").arg(QDir::toNativeSeparators(QCoreApplication::applicationDirPath() + "/REEMaker.exe"));
+                OperationApresQuitter(Operations); // Lance l'update après 5 secondes
+                QApplication::quit();
+                break;
+            }
+        }
+    }
+    delete myDownloader;
+}

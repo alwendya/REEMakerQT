@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
 
     if (EnNoir)
     {
-        qDebug() << "Mode sombre";
         QApplication::setStyle(new DarkStyle);
         FramelessWindow framelessWindow;
         MainWindow *mainWindow = new MainWindow;
@@ -72,7 +71,6 @@ int main(int argc, char *argv[])
     }
     else
     {
-        qDebug() << "Mode clair";
         a.setStyle("Fusion");
         MainWindow w;
         for (int i = 0; i < QGuiApplication::screens().count();++i)
@@ -102,7 +100,6 @@ int main(int argc, char *argv[])
                             QGuiApplication::primaryScreen()->geometry()
                             )
                         );
-        qDebug() << "Chargé";
         w.setWindowState( (w.windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
         w.activateWindow(); // for Windows
         w.show();
@@ -113,7 +110,6 @@ int main(int argc, char *argv[])
                                 (bVisible ? SWP_NOACTIVATE : 0));
                     SetForegroundWindow((HWND)w.winId());
         }
-        qDebug() << "Déchargé";
         return a.exec();
     }
     return a.exec();

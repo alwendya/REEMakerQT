@@ -25,6 +25,14 @@
 #include <QListWidgetItem>
 #include <QDesktopServices>
 #include <qdialogbuttonbox.h>
+#include <QFontDatabase>
+#include <QClipboard>
+#include <QtNetwork/qnetworkrequest.h>
+#include <QtNetwork/qnetworkaccessmanager.h>
+#include <QtNetwork/qnetworkreply.h>
+#include <QElapsedTimer>
+#include <QTimer>
+#include <QJsonDocument>
 #include <include/podofo/podofo.h>
 #include "blocQuestion.h"
 #include "BlocEditeur.h"
@@ -37,6 +45,183 @@ using namespace PoDoFo;
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+class HttpDownload : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit HttpDownload(QWidget *parent = 0)
+    {
+        progressDialog = new QProgressDialog(parent);
+        progressDialog->setAutoClose(false);
+        mThis = parent;
+        connect(progressDialog, SIGNAL(canceled()), this, SLOT(cancelDownload()));
+    }
+
+    ~HttpDownload()
+    {
+        qDebug() << "Deletion de HttpDownload";
+    }
+    enum class EtatFinTelechargement : qint16 {EnCours, AbandonnerParUtilisateur, ErreurDeTelechargement, TermineSansErreur};
+    enum class StatutDemarrage : qint16 {PasDeSource, PasDeDestination, AbandonFichierDestinationExistant, ErreurCreationFichierDestination, TelechargementDemarre};
+public:
+    EtatFinTelechargement RetourneStatut()
+    {
+        return Termine;
+    }
+    StatutDemarrage DemarreTelechargement(QUrl UrlATelecharge, QString DestinationDisque, QString TitreFenetre)
+    {
+        manager = new QNetworkAccessManager(this);
+        // get url
+        url = UrlATelecharge;
+        mDestinationDisque = DestinationDisque;
+        mTitreFenetre = TitreFenetre;
+        QFileInfo fileInfo(url.path());
+        if (url.toDisplayString(QUrl::None) == "")
+        {
+            progressDialog->close();
+            return StatutDemarrage::PasDeSource;
+        }
+
+        if (DestinationDisque.isEmpty())
+        {
+            progressDialog->close();
+            return StatutDemarrage::PasDeDestination;
+        }
+
+        if (QFile::exists(DestinationDisque)) {//On écrase toujours le fichier existant de MAJ
+//            if (QMessageBox::question(mThis, mTitreFenetre, QString("Il existe déjà un fichier %1. Ecrire par dessus?").arg(QFileInfo(DestinationDisque).fileName()),
+//                                      QMessageBox::Yes|QMessageBox::No, QMessageBox::No)
+//                    == QMessageBox::No)
+//            {
+//                progressDialog->close();
+//                return StatutDemarrage::AbandonFichierDestinationExistant;
+//            }
+            QFile::remove(DestinationDisque);// On le supprime
+        }
+
+        file = new QFile(DestinationDisque);
+        if (!file->open(QIODevice::WriteOnly)) {
+            QMessageBox::information(mThis, mTitreFenetre,
+                                     QString("Impossible de d'enregistrer le fichier %1: %2.")
+                                     .arg(DestinationDisque).arg(file->errorString()));
+            delete file;
+            file = 0;
+            progressDialog->close();
+            return StatutDemarrage::ErreurCreationFichierDestination;
+        }
+
+        // used for progressDialog
+        // This will be set true when canceled from progress dialog
+        httpRequestAborted = false;
+
+        progressDialog->setWindowTitle(mTitreFenetre);
+        progressDialog->setLabelText("Téléchargement de la mise à jour");
+        progressDialog->show();
+        // download button disabled after requesting download
+        startRequest(url);
+        return StatutDemarrage::TelechargementDemarre;
+    }
+private slots:
+
+    void startRequest(QUrl url)
+    {
+        Termine = EtatFinTelechargement::EnCours;
+        reply = manager->get(QNetworkRequest(url));
+        connect(reply, SIGNAL(readyRead()),
+                this, SLOT(httpReadyRead()));
+
+        connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
+                this, SLOT(updateDownloadProgress(qint64,qint64)));
+
+        connect(reply, SIGNAL(finished()),
+                this, SLOT(httpDownloadFinished()));
+    }
+
+    // slot for readyRead() signal
+    void httpReadyRead()
+    {
+        if (file)
+            file->write(reply->readAll());
+    }
+
+    // slot for finished() signal from reply
+    void httpDownloadFinished()
+    {
+        // when canceled
+        if (httpRequestAborted) {
+            if (file) {
+                file->close();
+                file->remove();
+                delete file;
+                file = 0;
+            }
+            reply->deleteLater();
+            progressDialog->hide();
+            Termine = EtatFinTelechargement::AbandonnerParUtilisateur;
+            reply = 0;
+            manager = 0;
+            return;
+        }
+
+        // download finished normally
+        progressDialog->hide();
+        file->flush();
+        file->close();
+
+        if (reply->error())
+        {
+            file->remove();
+            QMessageBox::information(mThis, mTitreFenetre,
+                                     QString("Le téléchargement a échoué : %1.")
+                                     .arg(reply->errorString()));
+            Termine = EtatFinTelechargement::ErreurDeTelechargement;
+        }
+        else
+        {
+            Termine = EtatFinTelechargement::TermineSansErreur;
+        }
+
+        reply->deleteLater();
+        reply = 0;
+        delete file;
+        file = 0;
+        manager = 0;
+        //        delete this;
+    }
+
+    // slot for downloadProgress()
+    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
+    {
+        if (httpRequestAborted)
+            return;
+        progressDialog->setMaximum(totalBytes);
+        progressDialog->setValue(bytesRead);
+    }
+
+    void cancelDownload()
+    {
+        httpRequestAborted = true;
+        reply->abort();
+    }
+
+private:
+    QUrl url;
+    EtatFinTelechargement Termine = EtatFinTelechargement::EnCours;
+    QNetworkAccessManager *manager;
+    QNetworkReply *reply;
+    QProgressDialog *progressDialog;
+    QString mDestinationDisque;
+    QString mTitreFenetre;
+    QFile *file;
+    bool httpRequestAborted;
+    qint64 fileSize;
+    QWidget* mThis;
+
+};
+
+
 
 class MainWindow : public QMainWindow
 {
@@ -53,6 +238,7 @@ public:
     ~MainWindow();
 
 signals:
+    void LanceUneMAJ(QString Version, QUrl Chemin);
 
 private slots:
     void on_OPT_Btn_ColTranche0_clicked();
@@ -211,6 +397,11 @@ private slots:
 
     void on_PDG_Btn_SupprimePDGUtilisateur_clicked();
 
+    void on_FolioListeINFO_customContextMenuRequested(const QPoint &pos);
+
+protected:
+    void resizeEvent(QResizeEvent *event);
+
 private:
     Ui::MainWindow *ui;
     class KeyPressEater : public QObject
@@ -220,8 +411,8 @@ private:
         {
             if (event->type() == QEvent::KeyPress) {
                 QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-
-                qDebug("Ate key press %d", keyEvent->key());
+                Q_UNUSED(keyEvent);
+//                qDebug("Ate key press %d", keyEvent->key());
                 return true;
             } else {
                 // standard event processing
@@ -230,6 +421,21 @@ private:
         }
     };
     KeyPressEater *keyPressEater = new KeyPressEater();
+    void OperationApresQuitter(QStringList mListe)
+    {
+        STARTUPINFO si = {0};
+        PROCESS_INFORMATION pi = {0};
+        QFileInfo CheminExe(QCoreApplication::applicationFilePath());
+        QString BaseCommande = QString("cmd.exe /C ping 1.1.1.1 -n 1 -w 5000 > Nul");
+        BaseCommande.append(mListe.join(""));
+        qDebug().nospace().noquote() << "Ligne de commande développée :" << Qt::endl << BaseCommande;
+        CreateProcess(NULL,(LPWSTR)BaseCommande.toStdWString().c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
+    }
+
+    QString DerniereVersion();
+    void DemarreLeTelechargement(QUrl);
     bool ChargePDG(QString);
     bool SauvePDG(QString);
     int GetNumArg(QVector<QString> &lVecList, int indexDepart);
@@ -241,6 +447,13 @@ private:
     enum ValeurRetour : qint16 {AucunFichierEntree, ErreurDeplacement, GhostScriptAbsent, ErreurDeGhostScript, Succes};
     ValeurRetour RepareGhostScript(QString , qint16 = 0, bool  = false);
     qint16 PDFInfoNombrePage(QString );
+    void LectureINI();
+    void  SauveINI();
+    void MiseEnPlaceChemin();
+    void MiseEnPlaceValidator();
+    void MiseEnPlaceInterface();
+    void MiseEnPlaceListInfo();
+    QFont fontList;
     QString PDFOuvert;
     QString PDGOuverte;
     QString CheminPoppler;
@@ -258,22 +471,23 @@ private:
     bool ThemeDark = true;
     QPoint dragPosition;
     QString TempTamponRoboto;
+    QString TempTamponRobotoMono;
     bool ModeAjoutPDG;
     QString GetVersion(QString fName);
     QString mVersion;
     PDGHelper mPDGHelper;
     class MyValidatorUPPER: public QValidator {
-     public:
+    public:
         MyValidatorUPPER(QObject* parent=nullptr): QValidator(parent) {}
         State validate(QString& input, int&) const override {
-          input = input.toUpper();
-           return QValidator::Acceptable;
+            input = input.toUpper();
+            return QValidator::Acceptable;
         }
-     };
+    };
     MyValidatorUPPER* validUPPER;
     bool ChargerPageDeGarde(QString Nom, QString Chemin);
     QString PDGOuvertePourEdition = "";
-//    qint64 IndexBlocEditeur = 0;
+    //    qint64 IndexBlocEditeur = 0;
     QColor MemColor = {0,0,0};
     PressePapier* mPressePapier = new PressePapier();
     qint64 RetourneIndexLibre();
@@ -285,5 +499,6 @@ private:
     QAction *AfficheEditAction;
     QAction *helpAction;
     SavState savState;
+    QPixmap QPXpreview;
 };
 #endif // MAINWINDOW_H
