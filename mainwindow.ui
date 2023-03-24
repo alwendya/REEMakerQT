@@ -34,7 +34,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>5</number>
+       <number>3</number>
       </property>
       <property name="iconSize">
        <size>
@@ -410,6 +410,9 @@
                <bold>true</bold>
               </font>
              </property>
+             <property name="statusTip">
+              <string>Vous allez ajouter une page de garde et ensuite démarrer le foliotage automatique</string>
+             </property>
              <property name="text">
               <string>    Ajouter une page de garde
     puis démarrer le foliotage</string>
@@ -444,6 +447,9 @@
               <font>
                <bold>true</bold>
               </font>
+             </property>
+             <property name="statusTip">
+              <string>Vous allez démarrer le foliotage sans ajouter de page de garde</string>
              </property>
              <property name="text">
               <string>    Démarrer le foliotage
@@ -500,41 +506,47 @@
            <string>Chemin de la procédure :</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="2" column="0" rowspan="2" colspan="2">
-            <widget class="QListWidget" name="FolioListeINFO">
+           <item row="0" column="2">
+            <widget class="QPushButton" name="Folioter_Btn_RechercherPDF">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
-               <height>70</height>
+               <width>128</width>
+               <height>0</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>16777215</width>
-               <height>70</height>
+               <width>128</width>
+               <height>16777215</height>
               </size>
              </property>
              <property name="font">
               <font>
-               <pointsize>8</pointsize>
                <bold>false</bold>
               </font>
              </property>
-             <property name="contextMenuPolicy">
-              <enum>Qt::CustomContextMenu</enum>
+             <property name="text">
+              <string>    Rechercher</string>
              </property>
-             <property name="alternatingRowColors">
-              <bool>false</bool>
+             <property name="icon">
+              <iconset resource="Resource.qrc">
+               <normaloff>:/PDFFile24</normaloff>:/PDFFile24</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
             </widget>
            </item>
-           <item row="3" column="2">
+           <item row="2" column="2">
             <widget class="QPushButton" name="Folioter_Btn_EtapeSuivante1">
              <property name="enabled">
               <bool>false</bool>
@@ -586,6 +598,24 @@
              </property>
             </widget>
            </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="Folioter_Label_InformationPDF">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0" colspan="2">
             <widget class="QLineEdit" name="Folioter_Txt_RechercheProcedure">
              <property name="font">
@@ -601,61 +631,37 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QPushButton" name="Folioter_Btn_RechercherPDF">
+           <item row="1" column="0" rowspan="2" colspan="2">
+            <widget class="QListWidget" name="FolioListeINFO">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="minimumSize">
               <size>
-               <width>128</width>
-               <height>0</height>
+               <width>0</width>
+               <height>70</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>128</width>
-               <height>16777215</height>
+               <width>16777215</width>
+               <height>70</height>
               </size>
              </property>
              <property name="font">
               <font>
+               <pointsize>8</pointsize>
                <bold>false</bold>
               </font>
              </property>
-             <property name="text">
-              <string>    Rechercher</string>
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
              </property>
-             <property name="icon">
-              <iconset resource="Resource.qrc">
-               <normaloff>:/PDFFile24</normaloff>:/PDFFile24</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>24</width>
-               <height>24</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLabel" name="Folioter_Label_InformationPDF">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string/>
+             <property name="alternatingRowColors">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -1263,48 +1269,38 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item row="1" column="0">
-            <widget class="QPushButton" name="Annulation_Bouton_Tout">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>220</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>220</width>
-               <height>16777215</height>
-              </size>
+           <item row="2" column="2" rowspan="2">
+            <widget class="QPushButton" name="Annulation_Btn_Valider">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
              </property>
              <property name="statusTip">
-              <string>Sélectionne la totalité des folios</string>
+              <string>Continuer le foliotage avec les folios sélectionnés</string>
              </property>
              <property name="text">
-              <string>    Tout sélectionner</string>
+              <string>    Valider le choix des folios à annuler</string>
              </property>
              <property name="icon">
               <iconset resource="Resource.qrc">
-               <normaloff>:/ChoisirTout</normaloff>:/ChoisirTout</iconset>
+               <normaloff>:/Accepter</normaloff>:/Accepter</iconset>
              </property>
              <property name="iconSize">
               <size>
-               <width>24</width>
-               <height>24</height>
+               <width>32</width>
+               <height>32</height>
               </size>
+             </property>
+             <property name="default">
+              <bool>true</bool>
              </property>
              <property name="flat">
               <bool>false</bool>
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
+           <item row="3" column="0">
             <widget class="QPushButton" name="Annulation_Bouton_Rien">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -1345,38 +1341,7 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="2" rowspan="2">
-            <widget class="QPushButton" name="Annulation_Btn_Valider">
-             <property name="font">
-              <font>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Continuer le foliotage avec les folios sélectionnés</string>
-             </property>
-             <property name="text">
-              <string>    Valider le choix des folios à annuler</string>
-             </property>
-             <property name="icon">
-              <iconset resource="Resource.qrc">
-               <normaloff>:/Accepter</normaloff>:/Accepter</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>32</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="default">
-              <bool>true</bool>
-             </property>
-             <property name="flat">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3" rowspan="2">
+           <item row="1" column="2">
             <widget class="QPushButton" name="Annulation_Btn_NePasAnnuler">
              <property name="statusTip">
               <string>Continuer le foliotage avec aucun folio sélectionné</string>
@@ -1396,6 +1361,54 @@
              </property>
              <property name="flat">
               <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" rowspan="2">
+            <widget class="QPushButton" name="Annulation_Bouton_Tout">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>220</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>220</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="statusTip">
+              <string>Sélectionne la totalité des folios</string>
+             </property>
+             <property name="text">
+              <string>    Tout sélectionner</string>
+             </property>
+             <property name="icon">
+              <iconset resource="Resource.qrc">
+               <normaloff>:/ChoisirTout</normaloff>:/ChoisirTout</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" rowspan="3">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>
@@ -1490,7 +1503,7 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="3">
-         <widget class="QComboBox" name="PDG_Combo_Integre">
+         <widget class="QComboBox_custom" name="PDG_Combo_Integre">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -1529,7 +1542,7 @@
          </widget>
         </item>
         <item row="0" column="8">
-         <widget class="QComboBox" name="PDG_Combo_Utilisateur">
+         <widget class="QComboBox_custom" name="PDG_Combo_Utilisateur">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -3227,59 +3240,17 @@ page de garde utilisateur</string>
            <string>Autre paramètres :</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_11">
-           <item row="3" column="1">
-            <widget class="QLabel" name="label_55">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
+           <item row="4" column="0" colspan="2">
+            <widget class="QLabel" name="label_8">
              <property name="text">
-              <string>Latéral (En point) :</string>
+              <string>Texte folio annulé :</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QRadioButton" name="OPT_Radio_HG">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>L'emplacement du tampon sera en haut à gauche de chaque page</string>
-             </property>
+           <item row="0" column="0" colspan="3">
+            <widget class="QLabel" name="label_13">
              <property name="text">
-              <string>En haut à gauche</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="6" rowspan="2">
-            <widget class="QCheckBox" name="OPT_Check_GhostScript">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Utilise GhostScript pour remettre en conformité le fichier PDF avant foliotage (Une sauvegarde est effectuée)</string>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="text">
-              <string>Contrôler et corriger le document PDF
-à son ouverture avec Ghostscript</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0" colspan="3">
-            <widget class="QLabel" name="label_54">
-             <property name="text">
-              <string>Marge du tampon :</string>
+              <string>Emplacement du tampon :</string>
              </property>
             </widget>
            </item>
@@ -3295,24 +3266,6 @@ page de garde utilisateur</string>
              </property>
              <property name="text">
               <string>Ouvrir les documents PDF après générations</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="2">
-            <widget class="QSpinBox" name="OPT_Spin_Largeur">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>Position en point de l'emplacement du tampon par rapport au bord de la page</string>
-             </property>
-             <property name="maximum">
-              <number>100</number>
-             </property>
-             <property name="value">
-              <number>20</number>
              </property>
             </widget>
            </item>
@@ -3338,37 +3291,52 @@ page de garde utilisateur</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1" colspan="3">
-            <widget class="QLabel" name="label_34">
+           <item row="3" column="1">
+            <widget class="QLabel" name="label_55">
              <property name="font">
               <font>
                <bold>false</bold>
               </font>
              </property>
              <property name="text">
-              <string>Texte écrit sur les folios annulés (Max 50 caractères) :</string>
+              <string>Latéral (En point) :</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>Texte folio annulé :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="4">
-            <widget class="QRadioButton" name="OPT_Radio_BD">
+           <item row="1" column="6" rowspan="2">
+            <widget class="QCheckBox" name="OPT_Check_GhostScript">
              <property name="font">
               <font>
                <bold>false</bold>
               </font>
              </property>
              <property name="statusTip">
-              <string>L'emplacement du tampon sera en bas à droite de chaque page</string>
+              <string>Utilise GhostScript pour remettre en conformité le fichier PDF avant foliotage (Une sauvegarde est effectuée)</string>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
              </property>
              <property name="text">
-              <string>En bas à droite</string>
+              <string>Contrôler et corriger le document PDF
+à son ouverture avec Ghostscript</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="4">
+            <widget class="QSpinBox" name="OPT_Spin_Hauteur">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>Position en point de l'emplacement du tampon par rapport au bord de la page</string>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>20</number>
              </property>
             </widget>
            </item>
@@ -3387,21 +3355,100 @@ page de garde utilisateur</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="5">
-            <spacer name="horizontalSpacer_8">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+           <item row="1" column="4">
+            <widget class="QRadioButton" name="OPT_Radio_BD">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
              </property>
-             <property name="sizeHint" stdset="0">
+             <property name="statusTip">
+              <string>L'emplacement du tampon sera en bas à droite de chaque page</string>
+             </property>
+             <property name="text">
+              <string>En bas à droite</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QLabel" name="label_56">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Vertical (En point ) :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QRadioButton" name="OPT_Radio_HG">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>L'emplacement du tampon sera en haut à gauche de chaque page</string>
+             </property>
+             <property name="text">
+              <string>En haut à gauche</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1" colspan="3">
+            <widget class="QLabel" name="label_34">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Texte écrit sur les folios annulés (Max 50 caractères) :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="5">
+            <widget class="QLabel" name="label">
+             <property name="minimumSize">
               <size>
-               <width>40</width>
-               <height>20</height>
+               <width>50</width>
+               <height>0</height>
               </size>
              </property>
-            </spacer>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
            </item>
-           <item row="3" column="4">
-            <widget class="QSpinBox" name="OPT_Spin_Hauteur">
+           <item row="1" column="2">
+            <widget class="QRadioButton" name="OPT_Radio_HD">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="statusTip">
+              <string>L'emplacement du tampon sera en haut à droite de chaque page</string>
+             </property>
+             <property name="text">
+              <string>En haut à droite</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="3">
+            <widget class="QLabel" name="label_54">
+             <property name="text">
+              <string>Marge du tampon :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QSpinBox" name="OPT_Spin_Largeur">
              <property name="font">
               <font>
                <bold>false</bold>
@@ -3443,7 +3490,32 @@ page de garde utilisateur</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="7">
+           <item row="4" column="6">
+            <widget class="QLabel" name="label_58">
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Résolution en DPI des miniatures :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="8" rowspan="5">
+            <spacer name="horizontalSpacer_8">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="4" column="7">
             <widget class="QSpinBox" name="OPT_Spin_ResolutionDPI">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -3479,49 +3551,15 @@ page de garde utilisateur</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
-            <widget class="QRadioButton" name="OPT_Radio_HD">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>L'emplacement du tampon sera en haut à droite de chaque page</string>
-             </property>
-             <property name="text">
-              <string>En haut à droite</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="3">
-            <widget class="QLabel" name="label_13">
-             <property name="text">
-              <string>Emplacement du tampon :</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="3">
-            <widget class="QLabel" name="label_56">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Vertical (En point ) :</string>
-             </property>
-            </widget>
-           </item>
            <item row="3" column="6">
-            <widget class="QLabel" name="label_58">
+            <widget class="QCheckBox" name="OPT_Check_MAJ">
              <property name="font">
               <font>
                <bold>false</bold>
               </font>
              </property>
              <property name="text">
-              <string>Résolution en DPI des miniatures :</string>
+              <string>Désactiver les mise à jour au démarrage</string>
              </property>
             </widget>
            </item>
@@ -4160,6 +4198,11 @@ p, li { white-space: pre-wrap; }
    <extends>QPushButton</extends>
    <header>custompushbutton.h</header>
   </customwidget>
+  <customwidget>
+   <class>QComboBox_custom</class>
+   <extends>QComboBox</extends>
+   <header>qcombobox_custom.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
@@ -4203,7 +4246,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>Annulation_Bouton_Tout</tabstop>
   <tabstop>Annulation_Bouton_Rien</tabstop>
   <tabstop>Annulation_Btn_Valider</tabstop>
-  <tabstop>Annulation_Btn_NePasAnnuler</tabstop>
   <tabstop>PDG_Combo_Integre</tabstop>
   <tabstop>PDG_Combo_Utilisateur</tabstop>
   <tabstop>PDG_Btn_SupprimePDGUtilisateur</tabstop>

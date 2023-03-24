@@ -1,54 +1,71 @@
-﻿#ifndef PDGHELPER_HPP
+﻿/* -------------------------------------------------------------------------- */
+/*      REEMaker 5 -- Grégory WENTZEL (c) 2023   Code sous licence GPL3       */
+/* -------------------------------------------------------------------------- */
+
+#ifndef PDGHELPER_HPP
 #define PDGHELPER_HPP
 
-/*
-*  REEMaker 5 __ Grégory WENTZEL (c) 2021
-*/
-
-#include <QWidget>
+#include <include/podofo/podofo.h>
+#include <QCoreApplication>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QDir>
-#include <QCoreApplication>
-#include <include/podofo/podofo.h>
+#include <QWidget>
 
-class PDGHelper
-{
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class PDGHelper;
+}
+QT_END_NAMESPACE
 
-public:
-    enum class TypeCommande
-    {
-        DESSINELIGNE, DESSINERECTANGLEVIDE, DESSINERECTANGLEGRILLE, DESSINERECTANGLEREMPLIS, DESSINETEXTE, DESSINETEXTEMULTILIGNE, DESSINETEXTEQUESTION, DESSINETEXTEMULTILIGNEQUESTION, INSEREIMAGE, DESSINECHECKBOX, DESSINECHECKBOXQUESTION, PAGESUIVANTE, DESSINEMULTICHECKBOXQUESTION
+/** PDGHelper:
+    Class d'aide pour les pages de gardes
+*/
+class PDGHelper : public QObject {
+    Q_OBJECT
+   public:
+    enum class TypeCommande {
+        DESSINELIGNE,
+        DESSINERECTANGLEVIDE,
+        DESSINERECTANGLEGRILLE,
+        DESSINERECTANGLEREMPLIS,
+        DESSINETEXTE,
+        DESSINETEXTEMULTILIGNE,
+        DESSINETEXTEQUESTION,
+        DESSINETEXTEMULTILIGNEQUESTION,
+        INSEREIMAGE,
+        DESSINECHECKBOX,
+        DESSINECHECKBOXQUESTION,
+        PAGESUIVANTE,
+        DESSINEMULTICHECKBOXQUESTION
     };
 
-    struct Question
-    {
+    struct Question {
         int IndexQuestion;
         QString LaQuestion;
         QString AideQuestion;
         QString DefautQuestion;
-        bool Obligatoire = false;
-        bool EstCheckbox = false;
-        bool CheckboxValue = false;
-        bool EstLigneTexte = false;
+        bool Obligatoire        = false;
+        bool EstCheckbox        = false;
+        bool CheckboxValue      = false;
+        bool EstLigneTexte      = false;
         bool EstMultiLigneTexte = false;
-        bool EstMajuscule = false;
-        bool EstMinuscule = false;
-        bool EstChiffre = false;
+        bool EstMajuscule       = false;
+        bool EstMinuscule       = false;
+        bool EstChiffre         = false;
         qint64 Maximum;
     };
-    struct structReplaceArray
-    {
+    struct structReplaceArray {
         QString ReferenceSite = "";
         QString NumeroTranche = "";
-        QString ReferenceREE = "";
-        QString IndiceREE = "";
-        int REErouge = 0;
-        int REEvert = 0;
-        int REEbleu = 0;
-        int REErougeAccent = 0;
-        int REEvertAccent = 0;
-        int REEbleuAccent = 0;
+        QString ReferenceREE  = "";
+        QString IndiceREE     = "";
+        int REErouge          = 0;
+        int REEvert           = 0;
+        int REEbleu           = 0;
+        int REErougeAccent    = 0;
+        int REEvertAccent     = 0;
+        int REEbleuAccent     = 0;
     };
     PDGHelper();
     bool OpenAndParseConfig_v2(QString CheminConfig);
@@ -60,15 +77,18 @@ public:
     void ClearList();
     QVector<Question> ListeQuestion;
     structReplaceArray ArrayFromREEMAKER;
+    void EnvoiLogVersMainWindows(QString);
     ~PDGHelper();
-private:
-    struct CmdKeys
-    {
+
+   signals:
+    void EnvoiLogMessage(const QString& arg);
+
+   private:
+    struct CmdKeys {
         QString Keys;
         QString Valeur;
     };
-    struct structCOMMANDE
-    {
+    struct structCOMMANDE {
         TypeCommande mTypeCommande;
         QVector<CmdKeys> mVecCommande;
     };

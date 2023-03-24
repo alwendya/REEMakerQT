@@ -17,8 +17,6 @@ SOURCES += \
     blocQuestion.cpp \
     customHeader.cpp \
     customPushButton.cpp \
-    framelesswindow/framelesswindow.cpp \
-    framelesswindow/windowdragger.cpp \
     main.cpp \
     mainwindow.cpp \
     pressepapier.cpp
@@ -27,17 +25,15 @@ HEADERS += \
     BlocEditeur.h \
     DarkStyle.h \
     PdgHelper.h \
+    QComboBox_custom.h \
     bloc.h \
     blocQuestion.h \
     customHeader.h \
     customPushButton.h \
-    framelesswindow/framelesswindow.h \
-    framelesswindow/windowdragger.h \
     mainwindow.h \
     pressepapier.h
 
 FORMS += \
-    framelesswindow/framelesswindow.ui \
     mainwindow.ui
 
 # Default rules for deployment.
@@ -57,6 +53,8 @@ RC_ICONS = ReeMaker.ico
 
 unix|win32: LIBS += -L$$PWD/lib/ -llibpodofo.dll
 LIBS += -lVersion
+# LIBS += -lKernel32
+
 INCLUDEPATH += $$PWD/include
 DEPENDPATH += $$PWD/include
 
@@ -64,5 +62,4 @@ INCLUDEPATH +="framelesswindow"
 
 RESOURCES += \
     Resource.qrc \
-    darkstyle.qrc \
-    framelesswindow.qrc
+    darkstyle.qrc

@@ -1,19 +1,24 @@
+/* -------------------------------------------------------------------------- */
+/*      REEMaker 5 -- Grégory WENTZEL (c) 2023   Code sous licence GPL3       */
+/* -------------------------------------------------------------------------- */
+
 #ifndef customHeader_H
 #define customHeader_H
 
-#include <QWidget>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QWidget>
 
-class customHeader : public QWidget
-{
+/** customHeader:
+    Class du header custom pour la liste des action (QListWidget)
+*/
+class customHeader : public QWidget {
     Q_OBJECT
-public:
-    explicit customHeader(QWidget *parent = nullptr);
+   public:
+    explicit customHeader(QWidget* parent = nullptr);
 
-signals:
-
+   signals:
 };
 
-#endif // customHeader_H
+#endif  // customHeader_H

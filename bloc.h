@@ -1,21 +1,38 @@
+/* -------------------------------------------------------------------------- */
+/*      REEMaker 5 -- Grégory WENTZEL (c) 2023   Code sous licence GPL3       */
+/* -------------------------------------------------------------------------- */
+
 #ifndef BLOC_H
 #define BLOC_H
 
 #include <QObject>
 
-class Bloc
-{
-public:
+/** Bloc:
+    Class du bloc, utilisé pour un QVcector avec les différents blocs à
+   l'intérieur
+*/
+class Bloc {
+   public:
     Bloc();
-    enum AlignementHorizontale : int {Gauche = 0, Milieu = 2, Droite = 4};
-    enum AlignementVerticale : int {Haut = 1, Centre = 3, Bas = 5};
-    enum TypeAction : int
-    {
-        DESSINELIGNE, DESSINERECTANGLEVIDE, DESSINERECTANGLEGRILLE, DESSINERECTANGLEREMPLIS, DESSINETEXTE, DESSINETEXTEMULTILIGNE, DESSINETEXTEQUESTION,
-        DESSINETEXTEMULTILIGNEQUESTION, DESSINECHECKBOX, DESSINECHECKBOXQUESTION, DESSINEMULTICHECKBOXQUESTION, INSEREIMAGE, PAGESUIVANTE, COMMENTAIRE
+    enum AlignementHorizontale : int { Gauche = 0, Milieu = 2, Droite = 4 };
+    enum AlignementVerticale : int { Haut = 1, Centre = 3, Bas = 5 };
+    enum TypeAction : int {
+        DESSINELIGNE,
+        DESSINERECTANGLEVIDE,
+        DESSINERECTANGLEGRILLE,
+        DESSINERECTANGLEREMPLIS,
+        DESSINETEXTE,
+        DESSINETEXTEMULTILIGNE,
+        DESSINETEXTEQUESTION,
+        DESSINETEXTEMULTILIGNEQUESTION,
+        DESSINECHECKBOX,
+        DESSINECHECKBOXQUESTION,
+        DESSINEMULTICHECKBOXQUESTION,
+        INSEREIMAGE,
+        PAGESUIVANTE,
+        COMMENTAIRE
     };
-    struct ItemDefinition
-    {
+    struct ItemDefinition {
         QString NomControle;
         qint64 IndexControle;
         TypeAction TypeAction;
@@ -58,4 +75,4 @@ public:
     };
 };
 
-#endif // BLOC_H
+#endif  // BLOC_H

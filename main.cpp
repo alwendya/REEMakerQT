@@ -1,116 +1,92 @@
+/* -------------------------------------------------------------------------- */
+/*      REEMaker 5 -- Grégory WENTZEL (c) 2023   Code sous licence GPL3       */
+/* -------------------------------------------------------------------------- */
+
 #include "mainwindow.h"
 #include <QApplication>
 
-///
-/// \brief qMain    Point d'entrée de l'executable, prends en compte le lancement en thème lumineux ou sombre
-/// \param argc
-/// \param argv
-/// \return
-///
-int main(int argc, char *argv[])
+bool
+CentrageHWND(HWND Fenetre)
+{
+    MainWindow::MonitorRects monitors;
+    int NumEcran = 0;
+    RECT FenetreAvecSouris;
+    SetRect(&FenetreAvecSouris, 0, 0, 0, 0);
+    foreach (auto var, monitors.rcMonitors) {
+        POINT Souris;
+        GetCursorPos(&Souris);
+        RECT InterRect;
+        RECT rSouris;
+        SetRect(&rSouris, Souris.x, Souris.y, Souris.x + 10, Souris.y + 10);
+        if (IntersectRect(&InterRect, &var, &rSouris) == TRUE) {
+            qDebug() << "Souris dans l'écran n°" << NumEcran << "[" << monitors.qvName[NumEcran] << "]";
+            SetRect(&FenetreAvecSouris, var.left, var.top, var.right, var.bottom);
+        }
+        NumEcran++;
+    }
+    if ((FenetreAvecSouris.right - FenetreAvecSouris.left) > 0) { // On peut centrer
+        RECT FenetreActuel;
+        GetWindowRect(Fenetre, &FenetreActuel);
+        MoveWindow(Fenetre,
+                   /*Left*/ FenetreAvecSouris.left + ((FenetreAvecSouris.right - FenetreAvecSouris.left) /*WidthEcran par2*/ / 2) -
+                     ((FenetreActuel.right - FenetreActuel.left) /*WidthFenetre*/ / 2),
+                   /*top*/ FenetreAvecSouris.top + ((FenetreAvecSouris.bottom - FenetreAvecSouris.top) /*HeightEcran par2*/ / 2) -
+                     ((FenetreActuel.bottom - FenetreActuel.top) /*HeightFenetre*/ / 2),
+                   /*width*/ FenetreActuel.right - FenetreActuel.left,
+                   /*height*/ FenetreActuel.bottom - FenetreActuel.top,
+                   TRUE);
+    }
+    return true;
+}
+
+/** main:
+    Point d'entrée de l'executable, prends en compte le lancement en thème
+   lumineux ou sombre
+
+    @param int argc
+    @param char *argv[]
+    @return int Code de retour
+*/
+int
+main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
 
-    QPoint pos = QCursor::pos();
-    bool Found = false;
-
     bool EnNoir = false;
     if (QFileInfo::exists(QCoreApplication::applicationDirPath() + "/REEMAKER.ini"))
-        if (QFileInfo(QCoreApplication::applicationDirPath() + "/REEMAKER.ini").size() > 0)
-        {
-
+        if (QFileInfo(QCoreApplication::applicationDirPath() + "/REEMAKER.ini").size() > 0) {
             QSettings settings(QCoreApplication::applicationDirPath() + "/REEMAKER.ini", QSettings::IniFormat);
             EnNoir = settings.value("REGLAGES/ThemeSombre").toBool();
         }
-
+    a.setStyle("Fusion");
     if (EnNoir)
+        a.setStyle(new DarkStyle);
+    MainWindow w;
+
+    CentrageHWND((HWND)w.winId());
+    w.setWindowState((w.windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+    w.activateWindow(); // for Windows
+    w.show();
     {
-        QApplication::setStyle(new DarkStyle);
-        FramelessWindow framelessWindow;
-        MainWindow *mainWindow = new MainWindow;
-        framelessWindow.setContent(mainWindow);
-        framelessWindow.setWindowTitle(mainWindow->windowTitle());
-        framelessWindow.setWindowIcon(QIcon(":/REEMaker16"));
-        framelessWindow.setGeometry(mainWindow->geometry());
-        for (int i = 0; i < QGuiApplication::screens().count();++i)
-        {
-            QScreen *screen = QGuiApplication::screens().at(i);
-            QRect screenRect = screen->geometry();
-            if (screenRect.contains(pos)) {
-                Found = true;
-                qDebug() << "Centrage fenêtre principale sur l'écran '" << screen->name() << "' index n°" << i;
-                framelessWindow.setGeometry(
-                            QStyle::alignedRect(
-                                Qt::LeftToRight,
-                                Qt::AlignCenter,
-                                framelessWindow.size(),
-                                QGuiApplication::screens().at(i)->geometry()
-                                )
-                            );
-                break;
-            }
-        }
-        if (!Found)
-            framelessWindow.setGeometry(
-                        QStyle::alignedRect(
-                            Qt::LeftToRight,
-                            Qt::AlignCenter,
-                            framelessWindow.size(),
-                            QGuiApplication::primaryScreen()->geometry()
-                            )
-                        );
-        framelessWindow.show();
-        {
-            bool bVisible = IsWindowVisible((HWND)framelessWindow.winId());
-            SetWindowPos((HWND)framelessWindow.winId(), HWND_TOP, 0, 0, 0, 0,
-                         SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW |
-                         (bVisible ? SWP_NOACTIVATE : 0));
-            SetForegroundWindow((HWND)framelessWindow.winId());
-        }
-        return a.exec();
-    }
-    else
-    {
-        a.setStyle("Fusion");
-        MainWindow w;
-        for (int i = 0; i < QGuiApplication::screens().count();++i)
-        {
-            QScreen *screen = QGuiApplication::screens().at(i);
-            QRect screenRect = screen->geometry();
-            if (screenRect.contains(pos)) {
-                Found = true;
-                qDebug() << "Centrage fenêtre principale sur l'écran '" << screen->name() << "' index n°" << i;
-                w.setGeometry(
-                            QStyle::alignedRect(
-                                Qt::LeftToRight,
-                                Qt::AlignCenter,
-                                w.size(),
-                                QGuiApplication::screens().at(i)->geometry()
-                                )
-                            );
-                break;
-            }
-        }
-        if (!Found)
-            w.setGeometry(
-                        QStyle::alignedRect(
-                            Qt::LeftToRight,
-                            Qt::AlignCenter,
-                            w.size(),
-                            QGuiApplication::primaryScreen()->geometry()
-                            )
-                        );
-        w.setWindowState( (w.windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
-        w.activateWindow(); // for Windows
-        w.show();
-        {
-            bool bVisible = IsWindowVisible((HWND)w.winId());
-                SetWindowPos((HWND)w.winId(), HWND_TOP, 0, 0, 0, 0,
-                                SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW |
-                                (bVisible ? SWP_NOACTIVATE : 0));
-                    SetForegroundWindow((HWND)w.winId());
-        }
-        return a.exec();
+        bool bVisible = IsWindowVisible((HWND)w.winId());
+        SetWindowPos((HWND)w.winId(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | (bVisible ? SWP_NOACTIVATE : 0));
+        SetForegroundWindow((HWND)w.winId());
     }
     return a.exec();
 }
+
+/* -- Si pas sous Windows -- */
+//    QPoint pos = QCursor::pos();
+//    bool Found = false;
+//        for (int i = 0; i < QGuiApplication::screens().count(); ++i) {
+//            QScreen* screen  = QGuiApplication::screens().at(i);
+//            QRect screenRect = screen->geometry();
+//            if (screenRect.contains(pos)) {
+//                Found = true;
+//                qDebug() << "Centrage fenêtre principale sur l'écran '" << screen->name() << "' index n°" << i;
+//                w.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, w.size(),
+//                QGuiApplication::screens().at(i)->geometry())); break;
+//            }
+//        }
+//        if (!Found)
+//            w.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, w.size(), QGuiApplication::primaryScreen()->geometry()));

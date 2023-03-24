@@ -1,23 +1,26 @@
 #ifndef PRESSEPAPIER_H
 #define PRESSEPAPIER_H
 
-#include <QWidget>
 #include <QDebug>
+#include <QWidget>
 #include "bloc.h"
 
-class PressePapier : public QWidget
-{
+/** PressePapier:
+    Classe Presse papier
+*/
+class PressePapier : public QWidget {
     Q_OBJECT
 
-public:
+   public:
     PressePapier();
     void AjoutPressePapier(Bloc::ItemDefinition);
     qint16 Taille();
     void Clear();
     QVector<Bloc::ItemDefinition> Liste();
     Bloc::ItemDefinition ItemAt(qint16);
-private:
+
+   private:
     QVector<Bloc::ItemDefinition> vecPressePaPier;
 };
 
-#endif // PRESSEPAPIER_H
+#endif  // PRESSEPAPIER_H
