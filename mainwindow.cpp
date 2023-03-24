@@ -53,26 +53,29 @@ MainWindow::MainWindow(QWidget* parent)
             if (Reponse == "Timeout") {
                 this->setWindowTitle(this->windowTitle() + " [Erreur à la récupération de la dernière version disponible]");
                 Consigne("Impossible d'atteindre le serveur de mise à jour (https://github.com/alwendya/REEMakerQT).");
-            } else if (Reponse.startsWith("v.", Qt::CaseInsensitive)) {
-                QString cReponse         = Reponse;
-                QString cmVersion        = mVersion;
-                qint16 VersionServeurINT = QString(cReponse.replace("v.", "").replace(".", "")).toInt();
-                qint16 VersionLocal      = QString(cmVersion.replace(".", "")).toInt();
-                Consigne(QString("Version interne : %1, Version disponible : %2, la mise à jour %3 nécessaire")
-                           .arg(QString::number(VersionLocal),
-                                QString::number(VersionServeurINT),
-                                QString((VersionServeurINT > VersionLocal) ? "est" : "n'est pas")),
-                         false,
-                         false,
-                         true);
-                if (VersionServeurINT > VersionLocal) {
-                    this->setWindowTitle(this->windowTitle() + " [Une mise à jour est disponible : " + Reponse.toUpper() + "]");
-                    Consigne("Une mise à jour [" + Reponse + "] a été trouvée.");
-                    emit LanceUneMAJ(Reponse, QUrl("https://github.com/alwendya/REEMakerQT/releases/download/" + Reponse + "/REEMaker.Update.7z"));
-                } else
-                    this->setWindowTitle(this->windowTitle() + " [Vous êtes à jour]");
             } else {
-                qDebug().noquote().nospace() << "On devrait pas être la...";
+                try {
+                    QString cReponse         = Reponse;
+                    QString cmVersion        = mVersion;
+                    qint16 VersionServeurINT = QString(cReponse.replace(".", "")).toInt();
+                    qint16 VersionLocal      = QString(cmVersion.replace(".", "")).toInt();
+                    Consigne(QString("Version interne : %1, Version disponible : %2, la mise à jour %3 nécessaire")
+                               .arg(QString::number(VersionLocal),
+                                    QString::number(VersionServeurINT),
+                                    QString((VersionServeurINT > VersionLocal) ? "est" : "n'est pas")),
+                             false,
+                             false,
+                             true);
+                    if (VersionServeurINT > VersionLocal) {
+                        this->setWindowTitle(this->windowTitle() + " [Une mise à jour est disponible : " + Reponse.toUpper() + "]");
+                        Consigne("Une mise à jour [" + Reponse + "] a été trouvée.");
+                        emit LanceUneMAJ(Reponse,
+                                         QUrl("https://github.com/alwendya/REEMakerQT/releases/download/" + Reponse + "/REEMaker.Update.7z"));
+                    } else
+                        this->setWindowTitle(this->windowTitle() + " [Vous êtes à jour]");
+                } catch (...) {
+                    qDebug().noquote().nospace() << "On devrait pas être la...";
+                }
             }
         });
         if (QFile::exists(QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/update.REEMaker.7z")) {
@@ -4985,16 +4988,13 @@ MainWindow::DerniereVersion()
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     QNetworkAccessManager nam;
     QNetworkReply* reply = nam.get(request);
-
-    timeout = false;
+    timeout              = false;
     timer->start(5000);
-
     while (!timeout) {
         qApp->processEvents();
         if (reply->isFinished())
             break;
     }
-
     if (reply->isFinished()) {
         QByteArray response_data = reply->readAll();
         QJsonDocument json       = QJsonDocument::fromJson(response_data);
