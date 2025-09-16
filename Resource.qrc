@@ -1,0 +1,64 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="IconeHelp32">Icone32/help.png</file>
+        <file alias="IconeWarning32">Icone32/warning.png</file>
+        <file alias="ColorPicker16">Icone16/color-picker.png</file>
+        <file alias="PDFFile24">Icone24/pdf_file.png</file>
+        <file alias="Next24">Icone24/next.png</file>
+        <file alias="AjoutPDG">Icone32/add.png</file>
+        <file alias="SansPDG">Icone32/error.png</file>
+        <file alias="AnnuleFolio">Icone24/incompetent.png</file>
+        <file alias="ChoisirTout">Icone24/checkbox.png</file>
+        <file alias="ChoisirRien">Icone24/stop.png</file>
+        <file alias="Accepter">Icone32/accept.png</file>
+        <file alias="Refuser">Icone32/cross.png</file>
+        <file alias="BaseFichier">Icone32/filefolder.png</file>
+        <file alias="Principale">Icone24/main-folder.png</file>
+        <file alias="Utilisateur">Icone24/personal-folder.png</file>
+        <file alias="GenerePDF">Icone32/download-pdf.png</file>
+        <file alias="SauveDisque">Icone32/download.png</file>
+        <file alias="Supprimer">Icone24/recycle-bin.png</file>
+        <file alias="A propos">Icone32/info.png</file>
+        <file alias="Foliotage">Icone32/numbers.png</file>
+        <file alias="Reglage">Icone32/settings.png</file>
+        <file alias="REEMaker16">Icone16/REEMaker16.ico</file>
+        <file alias="Ligne">Icone16/diagonal-line.png</file>
+        <file alias="RectangleGrille">Icone16/multirectangle.png</file>
+        <file alias="CarreRemplis">Icone16/square-of-rounded-corners.png</file>
+        <file alias="CarreVide">Icone16/square-shape-outline.png</file>
+        <file alias="SaisieTexte">Icone16/text-box.png</file>
+        <file alias="Texte">Icone16/text-font.png</file>
+        <file alias="CheckBox">Icone16/checked-box.png</file>
+        <file alias="MultiCheckbox">Icone16/multicheckbox.png</file>
+        <file alias="AjoutPage">Icone16/add(1).png</file>
+        <file alias="AjoutImage">Icone16/add.png</file>
+        <file alias="Commentaire">Icone16/comment.png</file>
+        <file alias="Separateur">Icone16/distance.png</file>
+        <file alias="Enregistrer">Icone16/diskette.png</file>
+        <file alias="Recommencer">Icone16/favorite.png</file>
+        <file alias="Ouvrir">Icone16/folder.png</file>
+        <file alias="Couper">Icone24/scissors.png</file>
+        <file alias="Copier">Icone24/copy.png</file>
+        <file alias="Vider">Icone24/dust.png</file>
+        <file alias="Fermer">Icone24/elevator.png</file>
+        <file alias="Coller">Icone24/paste.png</file>
+        <file alias="Supprime">Icone24/delete.png</file>
+        <file alias="Haut">Icone24/top-arrow.png</file>
+        <file alias="Monte">Icone24/up-arrow.png</file>
+        <file alias="Bas">Icone24/bottom-arrow.png</file>
+        <file alias="Descent">Icone24/down-arrow.png</file>
+        <file alias="ClairSombre">Icone24/day-and-night.png</file>
+        <file alias="RienFaire">Icone24/nothing.png</file>
+        <file alias="Tampon_classique">Image/TamponClassique.png</file>
+        <file alias="Tampon_slim">Image/TamponSlim.png</file>
+        <file>Icone32/0 tool-box.png</file>
+        <file>Icone32/pdf.png</file>
+        <file>Icone32/picture.png</file>
+        <file>Icone32/combine-data.png</file>
+        <file>Icone32/save.png</file>
+        <file>Icone32/TEXTE_writing-text.png</file>
+        <file>Icone32/flip (1).png</file>
+        <file>Icone32/flip.png</file>
+    </qresource>
+    <qresource prefix="/tool"/>
+</RCC>
