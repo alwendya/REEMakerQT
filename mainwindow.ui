@@ -34,7 +34,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="iconSize">
        <size>
@@ -1099,7 +1099,7 @@
            <string>Etendue du foliotage :</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
-           <item row="1" column="9">
+           <item row="1" column="6">
             <widget class="QPushButton" name="Folioter_Btn_EtapeSuivante3">
              <property name="enabled">
               <bool>true</bool>
@@ -1139,87 +1139,6 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="6">
-            <widget class="QLabel" name="label_7">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>à la page</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
-            <widget class="QSpinBox" name="Folioter_Spin_Partiel_Debut">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>48</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>99999</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4">
-            <widget class="QLabel" name="label_6">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>De la page</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QRadioButton" name="Folioter_Radio_FolioTotal">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>La procédure sera foliotée en totalité</string>
-             </property>
-             <property name="text">
-              <string>Foliotage total</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QSpinBox" name="Folioter_Spin_PremierePage">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="1">
             <widget class="QLabel" name="label_5">
              <property name="font">
@@ -1232,59 +1151,225 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="7">
-            <widget class="QSpinBox" name="Folioter_Spin_Partiel_Fin">
-             <property name="enabled">
-              <bool>false</bool>
+           <item row="1" column="2">
+            <widget class="QSpinBox" name="Folioter_Spin_PremierePage">
+             <property name="maximumSize">
+              <size>
+               <width>60</width>
+               <height>16777215</height>
+              </size>
              </property>
+             <property name="font">
+              <font>
+               <bold>false</bold>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" colspan="5">
+            <widget class="QFrame" name="frame_4">
              <property name="minimumSize">
               <size>
-               <width>48</width>
+               <width>0</width>
                <height>0</height>
               </size>
              </property>
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
+             <layout class="QGridLayout" name="gridLayout_35">
+              <property name="leftMargin">
+               <number>3</number>
+              </property>
+              <property name="topMargin">
+               <number>3</number>
+              </property>
+              <property name="rightMargin">
+               <number>3</number>
+              </property>
+              <property name="bottomMargin">
+               <number>3</number>
+              </property>
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item row="1" column="5">
+               <widget class="QSpinBox" name="Folioter_Spin_Partiel_Fin">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>48</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="4">
+               <widget class="QLabel" name="label_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>à la page</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="6">
+               <widget class="QLabel" name="label_104">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>          </string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" colspan="4">
+               <widget class="QRadioButton" name="Folioter_Radio_FolioTotal">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="statusTip">
+                 <string>La procédure sera foliotée en totalité</string>
+                </property>
+                <property name="text">
+                 <string>Foliotage total</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="7">
+               <widget class="QComboBox" name="Folioter_combo_Partiel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>300</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Garder aussi les pages hors foliotages</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Garder uniquement les pages foliotées</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QRadioButton" name="Folioter_Radio_FolioPartiel">
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="statusTip">
+                 <string>La procédure sera foliotée partiellement</string>
+                </property>
+                <property name="text">
+                 <string>Foliotage partiel     </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLabel" name="label_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>De la page</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QSpinBox" name="Folioter_Spin_Partiel_Debut">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>48</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>99999</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="8">
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QRadioButton" name="Folioter_Radio_FolioPartiel">
-             <property name="font">
-              <font>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="statusTip">
-              <string>La procédure sera foliotée partiellement</string>
-             </property>
-             <property name="text">
-              <string>Foliotage partiel</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="8">
+           <item row="1" column="3" colspan="3">
             <spacer name="horizontalSpacer_2">
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="0" column="3">
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Policy::Fixed</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -4003,7 +4088,20 @@ page de garde utilisateur</string>
         <string>Edition de page de gardes</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_15">
-        <item row="1" column="6">
+        <item row="0" column="6" colspan="2">
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="7">
          <widget class="QGroupBox" name="groupBox_3">
           <property name="minimumSize">
            <size>
@@ -4334,20 +4432,20 @@ page de garde utilisateur</string>
           </layout>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="EDIT_Bouton_OuvrirPDG">
+        <item row="0" column="3">
+         <widget class="QPushButton" name="EDIT_Bouton_EnregistrePDGSous">
           <property name="statusTip">
-           <string>Ouvrir une page de garde existante</string>
+           <string>Enregistrer cette page de garde sous (Copie)</string>
           </property>
           <property name="styleSheet">
            <string notr="true">background-color: rgb(0, 85, 255);</string>
           </property>
           <property name="text">
-           <string> Ouvrir</string>
+           <string> Enregistrer sous</string>
           </property>
           <property name="icon">
            <iconset resource="Resource.qrc">
-            <normaloff>:/Ouvrir</normaloff>:/Ouvrir</iconset>
+            <normaloff>:/Enregistrer</normaloff>:/Enregistrer</iconset>
           </property>
          </widget>
         </item>
@@ -4368,7 +4466,24 @@ page de garde utilisateur</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="6">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="EDIT_Bouton_OuvrirPDG">
+          <property name="statusTip">
+           <string>Ouvrir une page de garde existante</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 85, 255);</string>
+          </property>
+          <property name="text">
+           <string> Ouvrir</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resource.qrc">
+            <normaloff>:/Ouvrir</normaloff>:/Ouvrir</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="7">
          <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
            <string>Liste des commandes de la page de garde</string>
@@ -4405,23 +4520,6 @@ page de garde utilisateur</string>
           </layout>
          </widget>
         </item>
-        <item row="0" column="3">
-         <widget class="QPushButton" name="EDIT_Bouton_EnregistrePDGSous">
-          <property name="statusTip">
-           <string>Enregistrer cette page de garde sous (Copie)</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(0, 85, 255);</string>
-          </property>
-          <property name="text">
-           <string> Enregistrer sous</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resource.qrc">
-            <normaloff>:/Enregistrer</normaloff>:/Enregistrer</iconset>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="4">
          <widget class="QPushButton" name="Edit_Bouton_OutilCouleur">
           <property name="styleSheet">
@@ -4453,18 +4551,18 @@ page de garde utilisateur</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="5" colspan="2">
-         <spacer name="horizontalSpacer_7">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="Edit_Bouton_Preview">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 85, 255);</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
+          <property name="text">
+           <string>Aperçu</string>
           </property>
-         </spacer>
+          <property name="icon">
+           <iconset theme="QIcon::ThemeIcon::WindowNew"/>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -4594,7 +4692,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <string/>
           </property>
           <property name="currentIndex">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="iconSize">
            <size>
@@ -4602,6 +4700,173 @@ li.checked::marker { content: &quot;\2612&quot;; }
             <height>24</height>
            </size>
           </property>
+          <widget class="QWidget" name="tabWidgetPage4">
+           <attribute name="icon">
+            <iconset resource="Resource.qrc">
+             <normaloff>:/Icone32/combine-data.png</normaloff>:/Icone32/combine-data.png</iconset>
+           </attribute>
+           <attribute name="title">
+            <string>Fusionner vers un PDF</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_37">
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_105">
+              <property name="text">
+               <string>Ajouter des documents avec le + ou glisser des documents de l'explorateur de fichiers vers la liste (Format supportés : PDF, Jpeg, Png, Tiff, Webp, Bmp)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="DraggableListWidget" name="toolmerge_listv2"/>
+            </item>
+            <item row="2" column="1">
+             <widget class="QFrame" name="frame_11">
+              <property name="frameShape">
+               <enum>QFrame::Shape::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Shadow::Raised</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_14">
+               <property name="leftMargin">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>3</number>
+               </property>
+               <property name="rightMargin">
+                <number>3</number>
+               </property>
+               <property name="bottomMargin">
+                <number>3</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="tool_merge_add">
+                 <property name="toolTip">
+                  <string>Ajouter un document à la liste</string>
+                 </property>
+                 <property name="whatsThis">
+                  <string>Ajouter un document à la liste</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>24</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="tool_merge_remove">
+                 <property name="toolTip">
+                  <string>Supprimer l'élement sélectionné</string>
+                 </property>
+                 <property name="whatsThis">
+                  <string>Supprimer l'élement sélectionné</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="QIcon::ThemeIcon::ListRemove"/>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>24</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="tool_merge_clear">
+                 <property name="toolTip">
+                  <string>Effacer la liste complète</string>
+                 </property>
+                 <property name="whatsThis">
+                  <string>Effacer la liste complète</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="QIcon::ThemeIcon::EditDelete"/>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>24</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="tool_merge_optimise">
+                 <property name="text">
+                  <string>Optimiser la taille de stockage des images (recompression)</string>
+                 </property>
+                 <property name="icon">
+                  <iconset theme="sync-synchronizing"/>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_31">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="tool_merge_saveas">
+                 <property name="toolTip">
+                  <string>Démarrer la fusion des différents éléments</string>
+                 </property>
+                 <property name="whatsThis">
+                  <string>Démarrer la fusion des différents éléments</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="Resource.qrc">
+                   <normaloff>:/Icone32/save.png</normaloff>:/Icone32/save.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>48</width>
+                   <height>48</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_50">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="tabWidgetPage1">
            <attribute name="icon">
             <iconset resource="Resource.qrc">
@@ -5075,178 +5340,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </size>
               </property>
              </spacer>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="tabWidgetPage4">
-           <attribute name="icon">
-            <iconset resource="Resource.qrc">
-             <normaloff>:/Icone32/combine-data.png</normaloff>:/Icone32/combine-data.png</iconset>
-           </attribute>
-           <attribute name="title">
-            <string>Fusionner vers un PDF</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout_37">
-            <item row="1" column="1">
-             <widget class="DraggableListWidget" name="toolmerge_listv2"/>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="label_105">
-              <property name="text">
-               <string>Ajouter des documents avec le + ou glisser des documents de l'explorateur de fichiers vers la liste (Format supportés : PDF, Jpeg, Png, Tiff, Webp, Bmp)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2" rowspan="2">
-             <widget class="QFrame" name="frame_11">
-              <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_4">
-               <property name="leftMargin">
-                <number>3</number>
-               </property>
-               <property name="topMargin">
-                <number>3</number>
-               </property>
-               <property name="rightMargin">
-                <number>3</number>
-               </property>
-               <property name="bottomMargin">
-                <number>3</number>
-               </property>
-               <item>
-                <widget class="QFrame" name="frame_7">
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="frameShape">
-                  <enum>QFrame::Shape::NoFrame</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Shadow::Raised</enum>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_5">
-                  <item>
-                   <widget class="QPushButton" name="tool_merge_add">
-                    <property name="toolTip">
-                     <string>Ajouter un document à la liste</string>
-                    </property>
-                    <property name="whatsThis">
-                     <string>Ajouter un document à la liste</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset theme="QIcon::ThemeIcon::ListAdd"/>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="tool_merge_remove">
-                    <property name="toolTip">
-                     <string>Supprimer l'élement sélectionné</string>
-                    </property>
-                    <property name="whatsThis">
-                     <string>Supprimer l'élement sélectionné</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset theme="QIcon::ThemeIcon::ListRemove"/>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="tool_merge_clear">
-                    <property name="toolTip">
-                     <string>Effacer la liste complète</string>
-                    </property>
-                    <property name="whatsThis">
-                     <string>Effacer la liste complète</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset theme="QIcon::ThemeIcon::EditDelete"/>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>24</width>
-                      <height>24</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_50">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_7">
-                 <property name="orientation">
-                  <enum>Qt::Orientation::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QPushButton" name="tool_merge_saveas">
-                 <property name="toolTip">
-                  <string>Démarrer la fusion des différents éléments</string>
-                 </property>
-                 <property name="whatsThis">
-                  <string>Démarrer la fusion des différents éléments</string>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="Resource.qrc">
-                   <normaloff>:/Icone32/save.png</normaloff>:/Icone32/save.png</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>48</width>
-                   <height>48</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
             </item>
            </layout>
           </widget>
@@ -6424,7 +6517,7 @@ Comparaison suites de chiffres
                    <item>
                     <widget class="QLabel" name="label_81">
                      <property name="text">
-                      <string>    </string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -6448,7 +6541,7 @@ Comparaison suites de chiffres
                    <item>
                     <widget class="QLabel" name="label_79">
                      <property name="text">
-                      <string>      </string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -8633,11 +8726,6 @@ Comparaison suites de chiffres
   <tabstop>Folioter_Txt_RefREE</tabstop>
   <tabstop>Folioter_Txt_IndiceREE</tabstop>
   <tabstop>Folioter_Btn_EtapeSuivante2</tabstop>
-  <tabstop>Folioter_Radio_FolioTotal</tabstop>
-  <tabstop>Folioter_Radio_FolioPartiel</tabstop>
-  <tabstop>Folioter_Spin_Partiel_Debut</tabstop>
-  <tabstop>Folioter_Spin_Partiel_Fin</tabstop>
-  <tabstop>Folioter_Spin_PremierePage</tabstop>
   <tabstop>Folioter_Btn_EtapeSuivante3</tabstop>
   <tabstop>Folioter_Btn_ChoixFolioAnnuler</tabstop>
   <tabstop>Folioter_Btn_EtapeSuivante4</tabstop>
@@ -8767,9 +8855,6 @@ Comparaison suites de chiffres
   <tabstop>tool_extract_pdf_option_multipage</tabstop>
   <tabstop>tool_extract_pdf_option_singlefile</tabstop>
   <tabstop>toolmerge_listv2</tabstop>
-  <tabstop>tool_merge_add</tabstop>
-  <tabstop>tool_merge_remove</tabstop>
-  <tabstop>tool_merge_clear</tabstop>
   <tabstop>tool_merge_saveas</tabstop>
   <tabstop>txtEditSource</tabstop>
   <tabstop>tabWidget_2</tabstop>

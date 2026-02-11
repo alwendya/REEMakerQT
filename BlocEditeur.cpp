@@ -1587,7 +1587,7 @@ BlocEditeur::PeuplerListe(QListWidget* mListe, QVector<Bloc::ItemDefinition>& mV
     mListe->setUpdatesEnabled(false);
     mListe->clear();
     for (qsizetype VecIndex = 0; VecIndex < mVecteur.count(); ++VecIndex) {
-        if (VecIndex % 10 == 0) {
+        if (VecIndex % 100 == 0) {
             progress.setValue(VecIndex);
             QCoreApplication::processEvents();
         }
@@ -1614,16 +1614,21 @@ BlocEditeur::PeuplerListe(QListWidget* mListe, QVector<Bloc::ItemDefinition>& mV
     @return bool
 */
 bool
-BlocEditeur::AjoutFinListe(QListWidget* mListe, Bloc::ItemDefinition& mBloc)
+BlocEditeur::AjoutFinListe(QListWidget* mListe, Bloc::ItemDefinition& mBloc, bool AjoutPositionCourante)
 {
     if (mListe == nullptr)
         return false;
     BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, mBloc, mBloc.ThemeSombre);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(mListe);
-    mListe->addItem(item);
+
+    QListWidgetItem* item = new QListWidgetItem(/*mListe*/);
+    if (AjoutPositionCourante && mListe->currentRow() != -1)
+        mListe->insertItem(mListe->currentRow() + 1, item);
+    else
+        mListe->addItem(item);
     item->setSizeHint(mBlocEditeur->minimumSizeHint());
     mListe->setItemWidget(item, mBlocEditeur);
+    if (AjoutPositionCourante)
+        mListe->scrollToItem(item);
     return true;
 }
 

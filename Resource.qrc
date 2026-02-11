@@ -59,6 +59,8 @@
         <file>Icone32/TEXTE_writing-text.png</file>
         <file>Icone32/flip (1).png</file>
         <file>Icone32/flip.png</file>
+        <file>icone20/page_keep.png</file>
+        <file>icone20/page_remove.png</file>
     </qresource>
     <qresource prefix="/tool"/>
 </RCC>

@@ -40,6 +40,21 @@ PDGHelper::SetBaseModelePath(QString lBaseModelePath)
         BaseModelePath.append("/");
 }
 
+/** SetBaseImagePath:
+    Met en mémoire le dossier des images
+
+ @param lBaseImagePath Chemin complet vers le dossier contenant la page de
+garde utilisé pour le foliotage
+ @return aucun
+*/
+void
+PDGHelper::SetBaseImagePath(QString lBaseImagePath)
+{
+    BaseImagePath = lBaseImagePath;
+    if (!BaseImagePath.endsWith("/"))
+        BaseImagePath.append("/");
+}
+
 /** OpenAndParseConfig_v2:
     Ouvre et parse le contenu d'un fichier Page de garde
 
@@ -266,6 +281,53 @@ PDGHelper::BurstVersDisque(QString FichierSortie)
     return true;
 }
 
+/** DessinerGrilleDeRepere:
+    Permet de dessiner un quadrillage sur le document PoDoFo existant
+
+ @param Painter      Painter utilisé par PoDoFo
+ @param PageWidth    Largeur de la page (double)
+ @param PageHeight   Hauteur de la page (double)
+ @return void
+*/
+void
+PDGHelper::DessinerGrilleDeRepere(PoDoFo::PdfPainter& Painter, double PageWidth, double PageHeight)
+{
+    const double StepLarge = 100.0;
+    const double StepSmall = 10.0;
+
+    // Dessiner les lignes fines (tous les 10)
+    Painter.GraphicsState.SetStrokingColor(PdfColor(0.85, 0.85, 0.85)); // Couleur ligne faible
+    Painter.GraphicsState.SetLineWidth(0.2);
+
+    for (double x = 0; x <= PageWidth; x += StepSmall) {
+        Painter.DrawLine(x, PageHeight - 0, x, PageHeight - PageHeight);
+    }
+    for (double y = 0; y <= PageHeight; y += StepSmall) {
+        Painter.DrawLine(0, PageHeight - y, PageWidth, PageHeight - y);
+    }
+
+    // Dessiner les lignes principales et le texte (tous les 100)
+    Painter.GraphicsState.SetStrokingColor(PdfColor(0.7, 0.7, 0.7));       // Couleur ligne forte
+    Painter.GraphicsState.SetNonStrokingColor(PdfColor(0.65, 0.65, 0.65)); // Couleur texte
+    Painter.GraphicsState.SetLineWidth(0.5);
+
+    for (double x = 0; x <= PageWidth; x += StepLarge) {
+        Painter.DrawLine(x, PageHeight - 0, x, PageHeight - PageHeight);
+        PoDoFo::PdfString mUtf8(QStringToPdfString(QString::number(x)));
+        auto RECT = PoDoFo::Rect(x + 2, PageHeight - 10, 50, 10);
+        Painter.DrawTextMultiLine(
+          mUtf8, RECT, { PoDoFo::PdfDrawTextStyle::Regular, PoDoFo::PdfHorizontalAlignment::Left, PoDoFo::PdfVerticalAlignment::Center });
+    }
+
+    for (double y = 0; y <= PageHeight; y += StepLarge) {
+        Painter.DrawLine(0, PageHeight - y, PageWidth, PageHeight - y);
+        PoDoFo::PdfString mUtf8(QStringToPdfString(QString::number(y)));
+        auto RECT = PoDoFo::Rect(2, PageHeight - y - 2, 50, 10);
+        Painter.DrawTextMultiLine(
+          mUtf8, RECT, { PoDoFo::PdfDrawTextStyle::Regular, PoDoFo::PdfHorizontalAlignment::Left, PoDoFo::PdfVerticalAlignment::Top });
+    }
+}
+
 /** DrawOnPage_v2:
     Permet de dessiner la page de garde sur un document PoDoFo existant
 
@@ -274,7 +336,7 @@ PDGHelper::BurstVersDisque(QString FichierSortie)
     @return int : Le nombre de page créée
 */
 int
-PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Document)
+PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Document, bool AfficheGrille)
 {
     int NombrePageCree = 1;
     if (vecCommandeList.size() == 0) {
@@ -381,6 +443,13 @@ PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Docum
     foreach (auto var, vecVARIABLE) {
         qDebug() << "Variable '" << var.Variable << "'  avec la valeur de '" << var.Valeur << "'";
     }
+
+    // Dessin de la grille
+    if (AfficheGrille) {
+        Painter.TextState.SetFont(pFontReg, 5.0);
+        DessinerGrilleDeRepere(Painter, PageWidth, PageHeight);
+    }
+
     for (qsizetype lArg = 0; lArg < vecCommandeList.size(); lArg++) {
         /* -------------- Preload des ints -------------- */
         int ValRouge = RetourneCleInt(vecCommandeList[lArg].mVecCommande, "rouge");
@@ -737,6 +806,7 @@ PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Docum
             } break;
             case TypeCommande::DESSINETEXTEMULTILIGNE: {
                 {
+                    qDebug() << "DESSINETEXTEMULTILIGNE > " << valTexte;
                     Painter.GraphicsState.SetNonStrokingColor(PdfColor((double)(ValRouge / 255.0),
                                                                        (double)(valVert / 255.0),
                                                                        (double)(valBleu / 255.0))); // Couleur ligne
@@ -748,18 +818,29 @@ PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Docum
             } break;
             case TypeCommande::DESSINETEXTEQUESTION: {
                 {
-                    Painter.GraphicsState.SetNonStrokingColor(PdfColor((double)(ValRouge / 255.0),
-                                                                       (double)(valVert / 255.0),
-                                                                       (double)(valBleu / 255.0))); // Couleur ligne
                     if (ValSplit < 2) {
+                        auto RECT = PoDoFo::Rect(valDebutX, PageHeight - valDebutY - valHauteur, valLargeur, valHauteur);
                         PoDoFo::PdfString mUtf8(QStringToPdfString(valDefautquestion));
-                        Painter.DrawTextMultiLine(mUtf8,
-                                                  PoDoFo::Rect(valDebutX, PageHeight - valDebutY - valHauteur, valLargeur, valHauteur),
-                                                  { PdfDrawTextStyle::Regular, mAlignLargeur, mAlignHauteur });
+                        if (AfficheGrille) {
+                            Painter.GraphicsState.SetNonStrokingColor(PdfColor(0.933, 0.91, 0.667)); // placeholder
+                            Painter.DrawRectangle(RECT, PdfPathDrawMode::StrokeFill);
+                        }
+                        Painter.GraphicsState.SetNonStrokingColor(PdfColor((double)(ValRouge / 255.0),
+                                                                           (double)(valVert / 255.0),
+                                                                           (double)(valBleu / 255.0))); // Couleur ligne
+                        Painter.DrawTextMultiLine(mUtf8, RECT, { PdfDrawTextStyle::Regular, mAlignLargeur, mAlignHauteur });
                     } else {
                         double _gap = valLargeur / ValSplit;
                         for (qsizetype i = 0; i < ValSplit; i++) {
                             PoDoFo::PdfString mUtf8(QStringToPdfString(QString(valDefautquestion.mid(i, 1))));
+                            auto RECT = PoDoFo::Rect(valDebutX + (i * _gap), PageHeight - valDebutY - valHauteur, _gap, valHauteur);
+                            if (AfficheGrille) {
+                                Painter.GraphicsState.SetNonStrokingColor(PdfColor(0.933, 0.91, 0.667)); // placeholder
+                                Painter.DrawRectangle(RECT, PdfPathDrawMode::StrokeFill);
+                            }
+                            Painter.GraphicsState.SetNonStrokingColor(PdfColor((double)(ValRouge / 255.0),
+                                                                               (double)(valVert / 255.0),
+                                                                               (double)(valBleu / 255.0))); // Couleur ligne
                             Painter.DrawTextMultiLine(mUtf8,
                                                       PoDoFo::Rect(valDebutX + (i * _gap), PageHeight - valDebutY - valHauteur, _gap, valHauteur),
                                                       { PdfDrawTextStyle::Regular, mAlignLargeur, mAlignHauteur });
@@ -769,23 +850,25 @@ PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Docum
             } break;
             case TypeCommande::DESSINETEXTEMULTILIGNEQUESTION: {
                 {
+                    PoDoFo::PdfString mUtf8(QStringToPdfString(valDefautquestion));
+                    auto RECT = PoDoFo::Rect(valDebutX, PageHeight - valDebutY - valHauteur, valLargeur, valHauteur);
+                    if (AfficheGrille) {
+                        Painter.GraphicsState.SetNonStrokingColor(PdfColor(0.933, 0.91, 0.667)); // placeholder
+                        Painter.DrawRectangle(RECT, PdfPathDrawMode::StrokeFill);
+                    }
                     Painter.GraphicsState.SetNonStrokingColor(PdfColor((double)(ValRouge / 255.0),
                                                                        (double)(valVert / 255.0),
                                                                        (double)(valBleu / 255.0))); // Couleur ligne
-                    PoDoFo::PdfString mUtf8(QStringToPdfString(valDefautquestion));
-                    Painter.DrawTextMultiLine(mUtf8,
-                                              PoDoFo::Rect(valDebutX, PageHeight - valDebutY - valHauteur, valLargeur, valHauteur),
-                                              { PdfDrawTextStyle::Regular, mAlignLargeur, mAlignHauteur });
+                    Painter.DrawTextMultiLine(mUtf8, RECT, { PdfDrawTextStyle::Regular, mAlignLargeur, mAlignHauteur });
                 }
             } break;
             case TypeCommande::INSEREIMAGE: {
                 QString valChemin = RetourneCleStr(vecCommandeList[lArg].mVecCommande, "chemin");
                 {
                     try {
-                        QString CheminImage = BaseModelePath + valChemin;
+                        QString CheminImage = BaseImagePath + valChemin;
                         if (QFile::exists(CheminImage)) {
-                            auto image = Document.CreateImage(
-                              /*"image" + generate_random_64bit_hex()*/);
+                            auto image = Document.CreateImage();
                             image->Load(CheminImage.toStdString().c_str());
                             double mScaleW = (valLargeur / image->GetRect().Width);
                             double mScaleH = (valHauteur / image->GetRect().Height);
@@ -816,6 +899,10 @@ PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Docum
             } break;
             case TypeCommande::DESSINECHECKBOXQUESTION: {
                 {
+                    if (AfficheGrille) {
+                        Painter.GraphicsState.SetNonStrokingColor(PdfColor(0.933, 0.91, 0.667));
+                        Painter.DrawRectangle(valDebutX, PageHeight - valDebutY - valHauteur, valLargeur, valHauteur, PdfPathDrawMode::StrokeFill);
+                    }
                     Painter.GraphicsState.SetStrokingColor(PdfColor((double)(ValRouge / 255.0),
                                                                     (double)(valVert / 255.0),
                                                                     (double)(valBleu / 255.0))); // Couleur ligne
@@ -830,6 +917,11 @@ PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Docum
             } break;
             case TypeCommande::DESSINEMULTICHECKBOXQUESTION: {
                 {
+                    if (AfficheGrille) {
+                        Painter.GraphicsState.SetNonStrokingColor(PdfColor(0.933, 0.91, 0.667));
+                        Painter.DrawRectangle(valDebutX1, PageHeight - valDebutY1 - valHauteur, valLargeur, valHauteur, PdfPathDrawMode::StrokeFill);
+                        Painter.DrawRectangle(valDebutX2, PageHeight - valDebutY2 - valHauteur, valLargeur, valHauteur, PdfPathDrawMode::StrokeFill);
+                    }
                     Painter.GraphicsState.SetStrokingColor(PdfColor((double)(ValRouge / 255.0),
                                                                     (double)(valVert / 255.0),
                                                                     (double)(valBleu / 255.0))); // Couleur ligne
@@ -849,6 +941,10 @@ PDGHelper::DrawOnPage_v2(PoDoFo::PdfPainter& Painter, PoDoFo::PdfDocument& Docum
                 PoDoFo::PdfPage& pPage = Document.GetPages().CreatePageAt(NombrePageCree, PoDoFo::Rect(0.0, 0.0, 595.0, 842.0));
                 Painter.SetCanvas(pPage);
                 NombrePageCree++;
+                if (AfficheGrille) {
+                    Painter.TextState.SetFont(pFontReg, 5.0);
+                    DessinerGrilleDeRepere(Painter, PageWidth, PageHeight);
+                }
             } break;
             default:
                 break;

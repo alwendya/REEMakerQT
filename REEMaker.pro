@@ -5,13 +5,13 @@ CONFIG += c++17
 
 # Configuration de base
 TARGET = REEMaker
-VERSION = 6.0.0.0
+VERSION = 6.0.7.0
 
 # Informations de l'application
 QMAKE_TARGET_COMPANY = "WENTZEL Gr\351gory"
 QMAKE_TARGET_PRODUCT = "REEMaker"
 QMAKE_TARGET_DESCRIPTION = "Assistant de foliotage de proc\351dure"
-QMAKE_TARGET_COPYRIGHT = "Copyright \251 2023"
+QMAKE_TARGET_COPYRIGHT = "Copyright \251 2026"
 RC_ICONS = ReeMaker.ico
 
 # Sources

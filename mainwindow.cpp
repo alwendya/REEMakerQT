@@ -89,6 +89,22 @@ compareVersions(const VersionLogiciel& a, const VersionLogiciel& b)
     return false;
 }
 
+QString
+randomString8()
+{
+    // Alphabet alphanumérique
+    static const QString kAlphabet = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+    QString out;
+    out.reserve(8);
+
+    for (int i = 0; i < 8; ++i) {
+        // Tirage uniforme sur la taille de l’alphabet
+        int idx = QRandomGenerator::global()->bounded(kAlphabet.size());
+        out.append(kAlphabet.at(idx));
+    }
+    return out;
+}
+
 bool
 isDirectoryWritable(const QString& dirPath)
 {
@@ -386,12 +402,6 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    /// Régénaration des fichiers de l'archives
-    // auto _FA = FastArchiver();
-    // _FA.compressFolderBuffered("C:/GhostScript_10.05.1", "C:/Temp/GhostScript_base.zstd");
-    // _FA.compressFolderBuffered("C:/Poppler_25.07.0", "C:/Temp/PdfToPPM_base.zstd");
-    // _FA.decompressArchiveBuffered("C:/Temp/GhostScript_base.zstd", "C:/Temp/GhostScript_OUT");
-    // _FA.decompressArchiveBuffered("C:/Temp/PdfToPPM_base.zstd", "C:/Temp/Poppler_OUT");
     connect(this, &MainWindow::EmetNotification, this, &MainWindow::RecoisNotification);
 
     ModeAjoutPDG = false;
@@ -463,11 +473,11 @@ MainWindow::MainWindow(QWidget* parent)
                     }
                 } catch (...) {
                     emit EmetNotification("REEMaker - Information\nErreur inconnue à la récupération des données de mises à jour.");
-                    Consigne(
-                      "Téléchargement de la mise à jour, erreur du traitement de la réponse serveur, retenter la mise à jour ultérieurement...",
-                      true,
-                      false,
-                      true);
+                    Consigne("Téléchargement de la mise à jour, erreur du traitement de la réponse serveur, retenter la mise à jour "
+                             "ultérieurement...",
+                             true,
+                             false,
+                             true);
                 }
             }
         });
@@ -495,6 +505,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     ui->tvx_img_liste->Accept_Image(true);
     ui->tvx_img_liste->Accept_PDF(false);
+
+    ui->Folioter_combo_Partiel->setIconSize(QSize(128, 24));
+    ui->Folioter_combo_Partiel->setItemIcon(0, QIcon(":/icone20/page_keep.png"));
+    ui->Folioter_combo_Partiel->setItemIcon(1, QIcon(":/icone20/page_remove.png"));
 }
 
 /** ~MainWindow:
@@ -750,7 +764,7 @@ MainWindow::on_Folioter_Btn_RechercherPDF_clicked()
     EcrireDansIni("ChercheProcedure", QFileInfo(PDFOuvert).dir().path());
     { /// Creation fichier temporaire local pour bypasser le path > 260 caractères
         auto ExtendedSource = getExtendedPath(QDir::toNativeSeparators(PDFOuvert));
-        PDFOuvertLOCAL = CheminTemp + "/temp_" + QString::fromStdString(generate_random_64bit_hex()) + ".pdf";
+        PDFOuvertLOCAL = CheminTemp + "/temp_" + randomString8() + ".pdf";
         copyFileWithProgress(ExtendedSource, PDFOuvertLOCAL);
     }
     ui->Folioter_Txt_RechercheProcedure->setText(PDFOuvert);
@@ -1466,6 +1480,7 @@ MainWindow::on_Folioter_Radio_FolioTotal_toggled(bool checked)
     ui->Folioter_Spin_Partiel_Debut->setEnabled(false);
     ui->label_7->setEnabled(false);
     ui->Folioter_Spin_Partiel_Fin->setEnabled(false);
+    ui->Folioter_combo_Partiel->setEnabled(false);
 }
 
 /** on_Folioter_Radio_FolioPartiel_toggled:
@@ -1482,6 +1497,7 @@ MainWindow::on_Folioter_Radio_FolioPartiel_toggled(bool checked)
     ui->Folioter_Spin_Partiel_Debut->setEnabled(true);
     ui->label_7->setEnabled(true);
     ui->Folioter_Spin_Partiel_Fin->setEnabled(true);
+    ui->Folioter_combo_Partiel->setEnabled(true);
 }
 
 /** on_Folioter_Btn_FoliotageSansPDG_clicked:
@@ -1578,14 +1594,13 @@ MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
         }
         DEPOSE_OVERLAY_BLUR;
     }
-    qint64 mStarting = 0;
-    qint64 mEnding = vecMediaBox.size();
-    if (ui->Folioter_Radio_FolioPartiel->isChecked()) // Partiel
-    {
-        mStarting = ui->Folioter_Spin_Partiel_Debut->value() - 1;
-        mEnding = ui->Folioter_Spin_Partiel_Fin->value();
-    }
-    auto* po = ProgressOverlay::showDeterminate(this, "Création des tampons ...", mEnding - mStarting, true, true, 140);
+    qint64 mStart = ui->Folioter_Spin_Partiel_Debut->value();
+    qint64 mEnd = ui->Folioter_Spin_Partiel_Fin->value();
+    qint64 mTotal = vecMediaBox.size();
+    bool Partiel = ui->Folioter_Radio_FolioPartiel->isChecked();
+    bool PartielComplet = (ui->Folioter_combo_Partiel->currentIndex() == 0);
+
+    auto* po = ProgressOverlay::showDeterminate(this, "Création des tampons ...", mTotal, true, true, 140);
     po->enableBackdropBlur(true, 4.0, 0.5);
     qint64 iTranche = 0;
     qint64 iPage = 0;
@@ -1655,11 +1670,18 @@ MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
                 qDebug() << "couleur de base:" << couleur.GetRed() << couleur.GetGreen() << couleur.GetBlue();
                 qDebug() << "couleur d'accentuation :" << couleurAcc.GetRed() << couleurAcc.GetGreen() << couleurAcc.GetBlue();
                 /* -- Début de la génération pour chaque pages -- */
-                for (qint64 i = mStarting; i < mEnding; i++) {
+                for (qint64 i = 0; i < mTotal; i++) {
                     progressLock.lock();
                     iPage = i;
                     progressLock.unlock();
+
+                    // Si partiel et pas compris dans le range, on skip
+                    if (Partiel)
+                        if (i < (mStart - 1) || i >= (mEnd))
+                            continue;
+
                     PoDoFo::PdfPage& pPage = document.GetPages().GetPageAt(i);
+
                     /*
                      * Bien respecté l'ordre des déclaration afin de ne pas
                      * avoir à utiliser les matrices de rotations
@@ -1915,9 +1937,9 @@ MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
                 /* -- Fin du for i = 0 to Nb Pages -- */
 
                 /* -- Foliotage partiel -> Suppression des pages inutiles -- */
-                if (ui->Folioter_Radio_FolioPartiel->isChecked()) {
-                    qint64 nbPageRemoveFromStart = mStarting;
-                    qint64 nbPageRemoveFromEnd = vecMediaBox.size() - mEnding;
+                if (Partiel && !PartielComplet) {
+                    qint64 nbPageRemoveFromStart = mStart - 1;
+                    qint64 nbPageRemoveFromEnd = vecMediaBox.size() - mEnd;
                     for (qint64 iA = 0; iA < nbPageRemoveFromStart; iA++) // Suppression du début
                         document.GetPages().RemovePageAt(0);
                     for (qint64 iA = 0; iA < nbPageRemoveFromEnd; iA++) // Suppression de la fin
@@ -1973,7 +1995,7 @@ MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
                 /// Creation d'un fichier temporaire en local pour bypasser le
                 /// path > 260 caractères
                 auto ExtendedDest = getExtendedPath(QDir::toNativeSeparators(PDFSortieTranche));
-                QString tempOut = CheminTemp + "/temp_" + QString::fromStdString(generate_random_64bit_hex()) + ".pdf";
+                QString tempOut = CheminTemp + "/temp_" + randomString8() + ".pdf";
                 document.Save(tempOut.toUtf8().constData(), PdfSaveOptions::None);
                 copyFileWithProgress(tempOut, ExtendedDest, false);
                 QFile::remove(tempOut);
@@ -1997,7 +2019,7 @@ MainWindow::on_Folioter_Btn_FoliotageSansPDG_clicked()
         qint64 cpIPAGE = iPage;
         progressLock.unlock();
         QString NewText = "Tranche " + QString::number(cpITRANCHE) + " : Création des tampons...";
-        po->setValue(cpIPAGE - mStarting);
+        po->setValue(cpIPAGE);
         po->setText("Tranche " + QString::number(cpITRANCHE) + " : Création des tampons...");
         QCoreApplication::processEvents();
     }
@@ -2352,6 +2374,8 @@ MainWindow::ChargerPageDeGarde(QString Nom, QString Chemin)
     ui->PDG_ListeWidget->clear();
     mPDGHelper.ClearList();
     mPDGHelper.SetBaseModelePath(Chemin);
+    mPDGHelper.SetBaseImagePath(CheminImages);
+
     try {
         mPDGHelper.OpenAndParseConfig_v2(Nom + ".txt");
         {
@@ -2645,17 +2669,12 @@ MainWindow::on_EDIT_Bouton_Ligne_clicked()
     Bloc::ItemDefinition StructBloc = Bloc::ItemDefinition();
     StructBloc.TypeAction = Bloc::TypeAction::DESSINELIGNE;
     StructBloc.IndexControle = RetourneIndexLibre();
-    StructBloc.NomControle = QString("DESSINETEXTE " + QString::number(StructBloc.IndexControle));
+    StructBloc.NomControle = QString("DESSINELIGNE " + QString::number(StructBloc.IndexControle));
     StructBloc.Couleur = "#000000";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2672,15 +2691,10 @@ MainWindow::on_EDIT_Bouton_RectVide_clicked()
     StructBloc.IndexControle = RetourneIndexLibre();
     StructBloc.NomControle = QString("DESSINERECTANGLEVIDE " + QString::number(StructBloc.IndexControle));
     StructBloc.Couleur = "#000000";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2697,15 +2711,10 @@ MainWindow::on_EDIT_Bouton_RectGrille_clicked()
     StructBloc.IndexControle = RetourneIndexLibre();
     StructBloc.NomControle = QString("DESSINERECTANGLEGRILLE " + QString::number(StructBloc.IndexControle));
     StructBloc.Couleur = "#000000";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2723,15 +2732,10 @@ MainWindow::on_EDIT_Bouton_RectRemplis_clicked()
     StructBloc.NomControle = QString("DESSINERECTANGLEREMPLIS " + QString::number(StructBloc.IndexControle));
     StructBloc.Couleur = "#000000";
     StructBloc.CouleurRemplissage = "#000000";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2750,15 +2754,10 @@ MainWindow::on_EDIT_Bouton_Texte_clicked()
     StructBloc.Couleur = "#000000";
     StructBloc.Alignement_Horizontale = Bloc::AlignementHorizontale::Gauche;
     StructBloc.Alignement_Verticale = Bloc::AlignementVerticale::Centre;
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2777,15 +2776,10 @@ MainWindow::on_EDIT_Bouton_TexteMulti_clicked()
     StructBloc.Couleur = "#000000";
     StructBloc.Alignement_Horizontale = Bloc::AlignementHorizontale::Gauche;
     StructBloc.Alignement_Verticale = Bloc::AlignementVerticale::Centre;
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2804,15 +2798,10 @@ MainWindow::on_EDIT_Bouton_TexteQuestion_clicked()
     StructBloc.Couleur = "#000000";
     StructBloc.Alignement_Horizontale = Bloc::AlignementHorizontale::Gauche;
     StructBloc.Alignement_Verticale = Bloc::AlignementVerticale::Centre;
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2831,15 +2820,10 @@ MainWindow::on_EDIT_Bouton_TexteMultiQuestion_clicked()
     StructBloc.Couleur = "#000000";
     StructBloc.Alignement_Horizontale = Bloc::AlignementHorizontale::Gauche;
     StructBloc.Alignement_Verticale = Bloc::AlignementVerticale::Centre;
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2856,15 +2840,10 @@ MainWindow::on_EDIT_Bouton_Checkbox_clicked()
     StructBloc.IndexControle = RetourneIndexLibre();
     StructBloc.NomControle = QString("DESSINECHECKBOX " + QString::number(StructBloc.IndexControle));
     StructBloc.Couleur = "#000000";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2881,15 +2860,10 @@ MainWindow::on_EDIT_Bouton_CheckboxQeustion_clicked()
     StructBloc.IndexControle = RetourneIndexLibre();
     StructBloc.NomControle = QString("DESSINECHECKBOXQUESTION " + QString::number(StructBloc.IndexControle));
     StructBloc.Couleur = "#000000";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2906,15 +2880,10 @@ MainWindow::on_EDIT_Bouton_MultiCheckboxQuestion_clicked()
     StructBloc.IndexControle = RetourneIndexLibre();
     StructBloc.NomControle = QString("DESSINEMULTICHECKBOXQUESTION " + QString::number(StructBloc.IndexControle));
     StructBloc.Couleur = "#000000";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2926,20 +2895,17 @@ MainWindow::on_EDIT_Bouton_MultiCheckboxQuestion_clicked()
 void
 MainWindow::on_EDIT_Bouton_InsereImage_clicked()
 {
+
     Bloc::ItemDefinition StructBloc = Bloc::ItemDefinition();
-    StructBloc.TypeAction = Bloc::TypeAction::INSEREIMAGE;
     StructBloc.IndexControle = RetourneIndexLibre();
+    StructBloc.TypeAction = Bloc::TypeAction::INSEREIMAGE;
+    qDebug() << "Index Libre : >" << StructBloc.IndexControle;
     StructBloc.NomControle = QString("INSEREIMAGE " + QString::number(StructBloc.IndexControle));
     StructBloc.CheminImage = "../Img_resource/";
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2955,15 +2921,10 @@ MainWindow::on_EDIT_Bouton_PageSuivante_clicked()
     StructBloc.TypeAction = Bloc::TypeAction::PAGESUIVANTE;
     StructBloc.IndexControle = RetourneIndexLibre();
     StructBloc.NomControle = QString("PAGESUIVANTE " + QString::number(StructBloc.IndexControle));
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -2979,15 +2940,10 @@ MainWindow::on_EDIT_Bouton_Commentaire_clicked()
     StructBloc.TypeAction = Bloc::TypeAction::COMMENTAIRE;
     StructBloc.IndexControle = RetourneIndexLibre();
     StructBloc.NomControle = QString("COMMENTAIRE " + QString::number(StructBloc.IndexControle));
-    BlocEditeur* mBlocEditeur = new BlocEditeur(mPressePapier, this, StructBloc);
-    ui->EDIT_Liste->setUpdatesEnabled(false);
-    QListWidgetItem* item;
-    item = new QListWidgetItem(ui->EDIT_Liste);
-    mBlocEditeur->setWhatsThis(StructBloc.NomControle);
-    ui->EDIT_Liste->addItem(item);
-    item->setSizeHint(mBlocEditeur->minimumSizeHint());
-    ui->EDIT_Liste->setItemWidget(item, mBlocEditeur);
-    ui->EDIT_Liste->setUpdatesEnabled(true);
+
+    BlocEditeur BlocHelper;
+    BlocHelper.AjoutFinListe(ui->EDIT_Liste, StructBloc, true);
+
     Consigne("Ajout du bloc " + StructBloc.NomControle);
 }
 
@@ -3697,11 +3653,11 @@ MainWindow::SauvePDG(QString FichierSortie)
                 if (reponse.Alignement_Horizontale == Bloc::AlignementHorizontale::Droite)
                     f_out << "--alignlargeur=" << 2 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Haut)
-                    f_out << "--alignlargeur=" << 0 << Qt::endl;
+                    f_out << "--alignhauteur=" << 0 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Centre)
-                    f_out << "--alignlargeur=" << 1 << Qt::endl;
+                    f_out << "--alignhauteur=" << 1 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Bas)
-                    f_out << "--alignlargeur=" << 2 << Qt::endl;
+                    f_out << "--alignhauteur=" << 2 << Qt::endl;
                 if (reponse.Couleur == "{ACC 1}") {
                     f_out << "--rouge=" << -1 << Qt::endl;
                     f_out << "--vert=" << -1 << Qt::endl;
@@ -3735,7 +3691,7 @@ MainWindow::SauvePDG(QString FichierSortie)
                 f_out << "--debuty=" << reponse.DebutY << Qt::endl;
                 f_out << "--largeur=" << reponse.Largeur << Qt::endl;
                 f_out << "--hauteur=" << reponse.Hauteur << Qt::endl;
-                QString TexteMulti = reponse.Texte;
+                QString TexteMulti = reponse.TexteMultiligne;
                 TexteMulti.replace("\r\n", "{RetourLigne}");
                 TexteMulti.replace("\n", "{RetourLigne}");
                 f_out << "--texte=\"" << TexteMulti << "\"" << Qt::endl;
@@ -3746,11 +3702,11 @@ MainWindow::SauvePDG(QString FichierSortie)
                 if (reponse.Alignement_Horizontale == Bloc::AlignementHorizontale::Droite)
                     f_out << "--alignlargeur=" << 2 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Haut)
-                    f_out << "--alignlargeur=" << 0 << Qt::endl;
+                    f_out << "--alignhauteur=" << 0 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Centre)
-                    f_out << "--alignlargeur=" << 1 << Qt::endl;
+                    f_out << "--alignhauteur=" << 1 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Bas)
-                    f_out << "--alignlargeur=" << 2 << Qt::endl;
+                    f_out << "--alignhauteur=" << 2 << Qt::endl;
                 if (reponse.Couleur == "{ACC 1}") {
                     f_out << "--rouge=" << -1 << Qt::endl;
                     f_out << "--vert=" << -1 << Qt::endl;
@@ -3794,11 +3750,11 @@ MainWindow::SauvePDG(QString FichierSortie)
                 if (reponse.Alignement_Horizontale == Bloc::AlignementHorizontale::Droite)
                     f_out << "--alignlargeur=" << 2 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Haut)
-                    f_out << "--alignlargeur=" << 0 << Qt::endl;
+                    f_out << "--alignhauteur=" << 0 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Centre)
-                    f_out << "--alignlargeur=" << 1 << Qt::endl;
+                    f_out << "--alignhauteur=" << 1 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Bas)
-                    f_out << "--alignlargeur=" << 2 << Qt::endl;
+                    f_out << "--alignhauteur=" << 2 << Qt::endl;
                 if (reponse.Couleur == "{ACC 1}") {
                     f_out << "--rouge=" << -1 << Qt::endl;
                     f_out << "--vert=" << -1 << Qt::endl;
@@ -3856,11 +3812,11 @@ MainWindow::SauvePDG(QString FichierSortie)
                 if (reponse.Alignement_Horizontale == Bloc::AlignementHorizontale::Droite)
                     f_out << "--alignlargeur=" << 2 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Haut)
-                    f_out << "--alignlargeur=" << 0 << Qt::endl;
+                    f_out << "--alignhauteur=" << 0 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Centre)
-                    f_out << "--alignlargeur=" << 1 << Qt::endl;
+                    f_out << "--alignhauteur=" << 1 << Qt::endl;
                 if (reponse.Alignement_Verticale == Bloc::AlignementVerticale::Bas)
-                    f_out << "--alignlargeur=" << 2 << Qt::endl;
+                    f_out << "--alignhauteur=" << 2 << Qt::endl;
                 if (reponse.Couleur == "{ACC 1}") {
                     f_out << "--rouge=" << -1 << Qt::endl;
                     f_out << "--vert=" << -1 << Qt::endl;
@@ -4069,7 +4025,7 @@ MainWindow::RepareGhostScript(QString FichierSource, qint16 ValeurMax, bool Down
     env.insert("GS_FONTPATH", Windir + "\\fonts");
     procGhost->setProcessEnvironment(env);
     QString ConstructedArguments = QString("-dBATCH -dNOPAUSE -dSHORTERRORS -sDEVICE=pdfwrite %4 -I\"%1\" "
-                                           "-sOutputFile=\"%2\" \"%3\"")
+                                           "-sFONTPATH=\"%5\" -sOutputFile=\"%2\" \"%3\"")
                                      .arg(CheminBaseGhostScript + "resource/init",
                                           FichierSource,
                                           FichierBKUP,
@@ -4082,7 +4038,8 @@ MainWindow::RepareGhostScript(QString FichierSource, qint16 ValeurMax, bool Down
                                                        "-dColorImageFilter=/FlateEncode "
                                                        "-dGrayImageFilter=/FlateEncode "
                                                        "-dAutoRotatePages=/None"
-                                                     : "-dAutoRotatePages=/None");
+                                                     : "-dAutoRotatePages=/None",
+                                          CheminBaseGhostScript + "resource/font");
     procGhost->setNativeArguments(ConstructedArguments);
     procGhost->start(CheminBaseGhostScript + "bin/gswin64c.exe");
     if (ValeurMax != 0)
@@ -4203,127 +4160,29 @@ MainWindow::PDFInfoNombrePage(QString FichierSource)
 bool
 MainWindow::CheckIntegrite()
 {
-    Consigne("Démarrage du contrôle de l'intégrité des plugins et polices");
-    QProgressDialog progress("Contrôle de l'intégrité des plugins...", "", 0, 0, this);
-    progress.setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    progress.setWindowModality(Qt::WindowModal);
-    progress.setMaximum(1);
-    progress.setAutoClose(false);
-    progress.setCancelButton(0);
-    progress.setWindowIcon(this->windowIcon());
-    progress.installEventFilter(keyPressEater);
-    progress.show();
-    QCoreApplication::processEvents();
-    centerProgressDialogOnCurrentScreen(&progress);
-
-    bool needRepairGScript = false;
-    bool needRepairPoppler = false;
-    bool needRepairPolice = false;
-    uint64_t nombreFichier = 0;
-    auto _FA = FastArchiver();
-    /// Nombre fichier GhostScript
-    auto _flistGScript = _FA.retrieveContentInformation(QCoreApplication::applicationDirPath() + "/GhostScript_base.zstd",
-                                                        QCoreApplication::applicationDirPath() + "/GhostScript");
-    qDebug() << "GHOSTSCRIPT : " << _flistGScript.size() << " entrées à tester";
-    nombreFichier += _flistGScript.size();
-    auto _flistPoppler = _FA.retrieveContentInformation(QCoreApplication::applicationDirPath() + "/PdfToPPM_base.zstd",
-                                                        QCoreApplication::applicationDirPath() + "/PdfToPPM");
-    qDebug() << "POPPLER : " << _flistPoppler.size() << " entrées à tester";
-    nombreFichier += _flistPoppler.size();
-    auto _flistPolice = _FA.retrieveContentInformation(QCoreApplication::applicationDirPath() + "/Police_base.zstd",
-                                                       QCoreApplication::applicationDirPath() + "/Police");
-    qDebug() << "POLICES : " << _flistPolice.size() << " entrées à tester";
-    nombreFichier += _flistPolice.size();
-    progress.setMaximum(nombreFichier);
-    uint64_t ControledFile = 0;
-
-    for (auto& var : _flistGScript) { /// GHOSTSCRIPT
-        ControledFile++;
-        progress.setLabelText(QString("Contrôle de l'intégrité du fichier "
-                                      "%1/%2 du plugin Ghostscript")
-                                .arg(ControledFile)
-                                .arg(nombreFichier));
-        progress.setValue(ControledFile);
-        QCoreApplication::processEvents();
-        if (var.isDir)
-            continue;
-        auto newHash = _FA.computeXXH64_FileHash(var.fullPath);
-        if (newHash == "" /* Existe pas */ || newHash != var.xxhashFromArchive /*Corrompu*/) {
-            needRepairGScript = true;
-        }
+    Consigne("Démarrage du contrôle des plugins et polices");
+    // Test base GhostScript
+    if (!QFile::exists(QCoreApplication::applicationDirPath() + "/GhostScript/bin/gswin64c.exe")) {
+        QMessageBox::critical(this, "GhostScript absent", "Ghostscript n'est pas installé, réinstaller REEMaker...");
+        return false;
     }
-    for (auto& var : _flistPoppler) { /// POPPLER
-        ControledFile++;
-        progress.setLabelText(QString("Contrôle de l'intégrité du fichier %1/%2 du plugin Poppler").arg(ControledFile).arg(nombreFichier));
-        progress.setValue(ControledFile);
-        QCoreApplication::processEvents();
-        if (var.isDir)
-            continue;
-        auto newHash = _FA.computeXXH64_FileHash(var.fullPath);
-        if (newHash == "" /* Existe pas */ || newHash != var.xxhashFromArchive /*Corrompu*/) {
-            needRepairPoppler = true;
-        }
+    // Test base Poppler
+    if (!QFile::exists(QCoreApplication::applicationDirPath() + "/PdfToPPM/pdftoppm.exe")) {
+        QMessageBox::critical(this, "Poppler absent", "Poppler n'est pas installé, réinstaller REEMaker...");
+        return false;
     }
-
-    for (auto& var : _flistPolice) { /// POLICES
-        ControledFile++;
-        progress.setLabelText(QString("Contrôle de l'intégrité du fichier %1/%2 du pack de polices").arg(ControledFile).arg(nombreFichier));
-        progress.setValue(ControledFile);
-        QCoreApplication::processEvents();
-        if (var.isDir)
-            continue;
-        auto newHash = _FA.computeXXH64_FileHash(var.fullPath);
-        if (newHash == "" /* Existe pas */ || newHash != var.xxhashFromArchive /*Corrompu*/) {
-            needRepairPolice = true;
-        }
+    // Test base PDFTK
+    if (!QFile::exists(QCoreApplication::applicationDirPath() + "/pdftk.exe")) {
+        QMessageBox::critical(this, "PDFToolKit absent", "PDFToolKit n'est pas installé, réinstaller REEMaker...");
+        return false;
     }
-    if (needRepairGScript) {
-        Consigne("Le plugin Ghoscript n'est pas intègre, restauration du plugin");
-        progress.setLabelText("Le plugin Ghoscript n'est pas intègre, restauration du plugin");
-        QCoreApplication::processEvents();
-        progress.setMaximum(1);
-        progress.setValue(0);
-        QThread::msleep(500);
-        _FA.decompressArchiveBuffered(QCoreApplication::applicationDirPath() + "/GhostScript_base.zstd",
-                                      QCoreApplication::applicationDirPath() + "/GhostScript");
-        progress.setLabelText("Plugin Ghoscript restauré");
-        progress.setValue(1);
-        QCoreApplication::processEvents();
-    } else
-        qDebug() << "GhostScript est intègre !";
-    if (needRepairPoppler) {
-        Consigne("Le plugin Poppler n'est pas intègre, restauration du plugin");
-        progress.setLabelText("Le plugin Poppler n'est pas intègre, restauration du plugin");
-        progress.setMaximum(1);
-        progress.setValue(0);
-        QCoreApplication::processEvents();
-        QThread::msleep(500);
-        _FA.decompressArchiveBuffered(QCoreApplication::applicationDirPath() + "/PdfToPPM_base.zstd",
-                                      QCoreApplication::applicationDirPath() + "/PdfToPPM");
-        progress.setLabelText("Plugin Poppler restauré");
-        progress.setValue(1);
-        QCoreApplication::processEvents();
-    } else
-        qDebug() << "Poppler est intègre !";
-    if (needRepairPolice) {
-        Consigne("Le pack de police n'est pas intègre, restauration des polices");
-        progress.setLabelText("Le pack de police n'est pas intègre, restauration des polices");
-        progress.setMaximum(1);
-        progress.setValue(0);
-        QCoreApplication::processEvents();
-        QThread::msleep(500);
-        _FA.decompressArchiveBuffered(QCoreApplication::applicationDirPath() + "/Police_base.zstd",
-                                      QCoreApplication::applicationDirPath() + "/Police");
-        progress.setLabelText("Polices restaurés");
-        progress.setValue(1);
-        QCoreApplication::processEvents();
-    } else
-        qDebug() << "Les polices sont intègres !";
-    progress.setLabelText("Fin de l'analyse d'intégrité");
-    Consigne("Fin de l'analyse d'intégrité");
-    QCoreApplication::processEvents();
-    QThread::msleep(2000);
-    progress.close();
+    // Test base Police
+    QStringList ListePolice =
+      QDir(QCoreApplication::applicationDirPath() + "/Police").entryList({ "*.ttf" }, QDir::Files | QDir::Readable, QDir::Size);
+    if (ListePolice.size() < 8) {
+        QMessageBox::critical(this, "Polices Roboto", "Les polices Roboto ne sont pas installés, réinstaller REEMaker...");
+        return false;
+    }
     return true;
 }
 
@@ -4538,6 +4397,7 @@ MainWindow::MiseEnPlaceChemin()
 {
     CheminPoppler = QCoreApplication::applicationDirPath() + "/PdfToPPM/pdftoppm.exe";
     CheminGhostScript = QCoreApplication::applicationDirPath() + "/GhostScript/BatchGhostScript.bat";
+    CheminImages = QCoreApplication::applicationDirPath() + "/Img_resource/";
     CheminPDGUtilisateur = QCoreApplication::applicationDirPath() + "/PDG_utilisateur/";
     {
         QDir directory(QFileInfo(CheminPDGUtilisateur).filePath());
@@ -4597,9 +4457,7 @@ MainWindow::MiseEnPlaceChemin()
                 }
             }
     }
-    QString RANDOM = QUuid::createUuid().toString();
-    RANDOM.remove(QRegularExpression("{|}|-")); // Seulement les caractères en hexa
-    CheminTemp = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/REEMAKER_" + RANDOM;
+    CheminTemp = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/REEMAKER_" + randomString8();
     QDir().mkpath(CheminTemp);
     TempTamponRoboto = CheminTemp + "/Roboto-Regular.ttf";
     QFile::copy(QCoreApplication::applicationDirPath() + "/Police/Roboto-Regular.ttf", TempTamponRoboto);
@@ -5061,7 +4919,7 @@ MainWindow::on_tool_repair_run_button_clicked()
     /// Creation d'un fichier temporaire en local pour bypasser le path > 260
     /// caractères
     auto ExtendedSource = getExtendedPath(QDir::toNativeSeparators(PDF2Repair));
-    QString tempPDF = CheminTemp + "/temp_" + QString::fromStdString(generate_random_64bit_hex()) + ".pdf";
+    QString tempPDF = CheminTemp + "/temp_" + randomString8() + ".pdf";
     copyFileWithProgress(ExtendedSource, tempPDF);
 
     qint16 NombrePage = PDFInfoNombrePage(tempPDF);
@@ -5173,7 +5031,7 @@ MainWindow::on_tool_extract_images_run_button_clicked()
 
     // On travail avec un fichier temp court
     auto ExtendedSource = getExtendedPath(QDir::toNativeSeparators(ui->tool_extract_images_pdffile->text()));
-    QString tempPDF = CheminTemp + "/temp_" + QString::fromStdString(generate_random_64bit_hex()) + ".pdf";
+    QString tempPDF = CheminTemp + "/temp_" + randomString8() + ".pdf";
     copyFileWithProgress(ExtendedSource, tempPDF);
 
     qint64 PageDebut = ui->tool_extract_images_from->value();
@@ -5302,51 +5160,50 @@ MainWindow::on_tool_extract_pdf_run_button_clicked()
 
     // On travail avec un fichier temp court
     auto ExtendedSource = getExtendedPath(QDir::toNativeSeparators(FichierSource));
-    QString tempPDF = CheminTemp + "/temp_" + QString::fromStdString(generate_random_64bit_hex()) + ".pdf";
+    QString tempPDF = CheminTemp + "/temp_" + randomString8() + ".pdf";
     copyFileWithProgress(ExtendedSource, tempPDF);
 
+    QString CheminBasePDFTK = QCoreApplication::applicationDirPath() + "/pdftk.exe";
     if (ui->tool_extract_pdf_option_multipage->isChecked()) {
         ///
         /// Extraction en multi page
         ///
-        QString CheminBaseGhostScript = QCoreApplication::applicationDirPath() + "/GhostScript/";
-        auto* po = ProgressOverlay::showIndeterminate(this, "Extraction avec GhostScript...", true, true, 140);
+        auto* po = ProgressOverlay::showIndeterminate(this, "Extraction avec PDFToolkit...", true, true, 140);
         po->enableBackdropBlur(true, 4.0, 0.5);
         QCoreApplication::processEvents();
-        auto procGhost = new QProcess();
-        QString Windir = "";
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        Windir = env.value("windir");
-        env.insert("GS_LIB", QDir::toNativeSeparators(CheminBaseGhostScript) + "lib\\");
-        env.insert("GS_DLL", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-        env.insert("GS_BIN", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-        env.insert("GS_RESOURCE", QDir::toNativeSeparators(CheminBaseGhostScript) + "resource\\init");
-        env.insert("GS_FONTPATH", Windir + "\\fonts");
-        procGhost->setProcessEnvironment(env);
-        QString BaseSource = CheminTemp + "/temp_" + QString::fromStdString(generate_random_64bit_hex()) + "_";
+        QString BaseSource = CheminTemp + "/temp_" + randomString8() + "_";
+        QString tempPDFGSbloc = BaseSource + "bloc.pdf";
         QString tempPDFGS = BaseSource + "%05d.pdf";
 
         QString ConstructedArguments =
-          QString("-dBATCH -dNOPAUSE -dSHORTERRORS -sDEVICE=pdfwrite "
-                  "-dPDFSETTINGS=/prepress %4 -I\"%1\" "
-                  "-sOutputFile=\"%2\" \"%3\"")
-            .arg(CheminBaseGhostScript + "resource/init",
-                 tempPDFGS,
-                 tempPDF,
-                 QString("-dFirstPage=%1 -dLastPage=%2")
-                   .arg(QString::number(ui->tool_extract_pdf_from->value()), QString::number(ui->tool_extract_pdf_to->value())));
-        procGhost->setNativeArguments(ConstructedArguments);
-        procGhost->start(CheminBaseGhostScript + "bin/gswin64c.exe");
-        qDebug() << "Multi page : On démarre de la page " << ui->tool_extract_pdf_from->value() << " à la page " << ui->tool_extract_pdf_to->value();
-        while (procGhost->state() != QProcess::NotRunning) {
-            auto Lecture = QString(procGhost->readAllStandardOutput()).split("\n", Qt::SkipEmptyParts);
-            if (Lecture.count() > 0)
-                if (Lecture.last().size() < 20)
-                    po->setText("GhostScript > " + Lecture.last().trimmed());
-            QThread::msleep(25);
-            QCoreApplication::processEvents();
+          QString("\"%1\" cat %3-%4 output \"%2\"")
+            .arg(tempPDF, tempPDFGSbloc, QString::number(ui->tool_extract_pdf_from->value()), QString::number(ui->tool_extract_pdf_to->value()));
+        {
+            auto procPDFTK = new QProcess();
+            procPDFTK->setNativeArguments(ConstructedArguments);
+            procPDFTK->start(CheminBasePDFTK);
+            po->setText("PDFToolkit> Extraction en bloc");
+            // On extrait en bloc
+            while (procPDFTK->state() != QProcess::NotRunning) {
+                QThread::msleep(25);
+                QCoreApplication::processEvents();
+            }
         }
-        QFile::remove(tempPDFGS);
+        QFile::remove(tempPDF);
+        // Maintenant on split
+        ConstructedArguments = QString("\"%1\" burst output \"%2\"").arg(tempPDFGSbloc, tempPDFGS);
+        po->setText("PDFToolkit> Séparation par pages");
+        {
+            auto procPDFTK = new QProcess();
+            procPDFTK->setNativeArguments(ConstructedArguments);
+            procPDFTK->start(CheminBasePDFTK);
+            while (procPDFTK->state() != QProcess::NotRunning) {
+                QThread::msleep(25);
+                QCoreApplication::processEvents();
+            }
+        }
+        QFile::remove(tempPDFGSbloc);
+        QFile::remove(PathOutputPDF + "/doc_data.txt");
         /// Maintenant on recopie en définitifs
         int NombrePagesTotal = ui->tool_extract_pdf_to->value() - ui->tool_extract_pdf_from->value() + 1;
         po->close();
@@ -5361,51 +5218,34 @@ MainWindow::on_tool_extract_pdf_run_button_clicked()
             QCoreApplication::processEvents();
             QString Source = BaseSource + QString::asprintf("%0*d", 5, i + 1) + ".pdf";
             QString Destination = PathOutputPDF + "/" +
-                                  QString("[page %1] ").arg(QString::asprintf("%0*d", 5, ui->tool_extract_pdf_from->value() + i)) +
-                                  QFileInfo(FichierSource).fileName();
-
+                                  QString("%2 [%1].%3")
+                                    .arg(QString::asprintf("%0*d", 5, ui->tool_extract_pdf_from->value() + i),
+                                         QFileInfo(FichierSource).baseName(),
+                                         QFileInfo(FichierSource).suffix());
             QFile::copy(Source, Destination);
             QFile::remove(Source);
         }
         poD->close();
     } else {
         /// Extraction en un bloc
-        QString CheminBaseGhostScript = QCoreApplication::applicationDirPath() + "/GhostScript/";
-        auto* po = ProgressOverlay::showIndeterminate(this, "Extraction avec GhostScript...", true, true, 140);
+        auto* po = ProgressOverlay::showIndeterminate(this, "Extraction avec PDFToolkit...", true, true, 140);
         po->enableBackdropBlur(true, 4.0, 0.5);
         QCoreApplication::processEvents();
-        auto procGhost = new QProcess();
-        QString Windir = "";
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        Windir = env.value("windir");
-        env.insert("GS_LIB", QDir::toNativeSeparators(CheminBaseGhostScript) + "lib\\");
-        env.insert("GS_DLL", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-        env.insert("GS_BIN", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-        env.insert("GS_RESOURCE", QDir::toNativeSeparators(CheminBaseGhostScript) + "resource\\init");
-        env.insert("GS_FONTPATH", Windir + "\\fonts");
-        procGhost->setProcessEnvironment(env);
-        QString fileName =
-          PathOutputPDF + "/" +
-          QString("[%1-%2] ")
-            .arg(QString::asprintf("%0*d", 4, ui->tool_extract_pdf_from->value()), QString::asprintf("%0*d", 4, ui->tool_extract_pdf_to->value())) +
-          QFileInfo(FichierSource).fileName();
+        auto procPDFTK = new QProcess();
+        QString fileName = PathOutputPDF + "/" +
+                           QString("%3 [%1-%2].%4")
+                             .arg(QString::asprintf("%0*d", 4, ui->tool_extract_pdf_from->value()),
+                                  QString::asprintf("%0*d", 4, ui->tool_extract_pdf_to->value()),
+                                  QFileInfo(FichierSource).baseName(),
+                                  QFileInfo(FichierSource).suffix());
 
         QString ConstructedArguments =
-          QString("-dBATCH -dNOPAUSE -dSHORTERRORS -sDEVICE=pdfwrite "
-                  "-dPDFSETTINGS=/prepress %4 -I\"%1\" "
-                  "-sOutputFile=\"%2\" \"%3\"")
-            .arg(CheminBaseGhostScript + "resource/init",
-                 fileName,
-                 tempPDF,
-                 QString("-dFirstPage=%1 -dLastPage=%2")
-                   .arg(QString::number(ui->tool_extract_pdf_from->value()), QString::number(ui->tool_extract_pdf_to->value())));
-        procGhost->setNativeArguments(ConstructedArguments);
-        procGhost->start(CheminBaseGhostScript + "bin/gswin64c.exe");
-        while (procGhost->state() != QProcess::NotRunning) {
-            auto Lecture = QString(procGhost->readAllStandardOutput()).split("\n", Qt::SkipEmptyParts);
-            if (Lecture.count() > 0)
-                if (Lecture.last().size() < 20)
-                    po->setText("GhostScript > " + Lecture.last().trimmed());
+          QString("\"%1\" cat %3-%4 output \"%2\"")
+            .arg(tempPDF, fileName, QString::number(ui->tool_extract_pdf_from->value()), QString::number(ui->tool_extract_pdf_to->value()));
+        procPDFTK->setNativeArguments(ConstructedArguments);
+        procPDFTK->start(CheminBasePDFTK);
+        po->setText("PDFToolkit > Extraction");
+        while (procPDFTK->state() != QProcess::NotRunning) {
             QThread::msleep(25);
             QCoreApplication::processEvents();
         }
@@ -5456,7 +5296,7 @@ MainWindow::on_tool_merge_add_clicked()
         if (itemWidget->getExtension() == CustomListItemWidget::typeFichier::PDF) {
             // Copie local
             auto ExtendedSource = getExtendedPath(QDir::toNativeSeparators(var));
-            QString tempPDF = CheminTemp + "/temp_" + QString::fromStdString(generate_random_64bit_hex()) + ".pdf";
+            QString tempPDF = CheminTemp + "/temp_" + randomString8() + ".pdf";
             copyFileWithProgress(ExtendedSource, tempPDF, false);
             qint16 NombrePage = PDFInfoNombrePage(tempPDF);
             itemWidget->setStartPageMax(NombrePage);
@@ -5557,7 +5397,9 @@ MainWindow::on_tool_merge_saveas_clicked()
     QCoreApplication::processEvents();
 
     QStringList ListeFichiers;
-    QString BasetempPDF = CheminTemp + "/merge_" + QString::fromStdString(generate_random_64bit_hex()) + "_";
+    QString BasetempPDF = CheminTemp + "/merge_" + randomString8() + "_";
+    QString CheminBasePDFTK = QCoreApplication::applicationDirPath() + "/pdftk.exe";
+
     /// PSEUDO
     for (int i = 0; i < ui->toolmerge_listv2->count(); ++i) {
         po->setValue(i + 1);
@@ -5585,38 +5427,22 @@ MainWindow::on_tool_merge_saveas_clicked()
             auto ExtendedSource = getExtendedPath(QDir::toNativeSeparators(_FilePath));
             if (_FStart != 1 || _FEnd != _FEndMax) // Extraction partiel
             {
-                QString PDFinwork = CheminTemp + "/merge_" + QString::fromStdString(generate_random_64bit_hex()) + ".pdf";
+                QString PDFinwork = CheminTemp + "/merge_" + randomString8() + ".pdf";
                 copyFileWithProgress(ExtendedSource, PDFinwork, false);
                 /// Extraction en un bloc partiel
-                QString CheminBaseGhostScript = QCoreApplication::applicationDirPath() + "/GhostScript/";
                 QCoreApplication::processEvents();
-                auto procGhost = new QProcess();
-                QString Windir = "";
-                QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-                Windir = env.value("windir");
-                env.insert("GS_LIB", QDir::toNativeSeparators(CheminBaseGhostScript) + "lib\\");
-                env.insert("GS_DLL", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-                env.insert("GS_BIN", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-                env.insert("GS_RESOURCE", QDir::toNativeSeparators(CheminBaseGhostScript) + "resource\\init");
-                env.insert("GS_FONTPATH", Windir + "\\fonts");
-                procGhost->setProcessEnvironment(env);
-                QString ConstructedArguments = QString("-dBATCH -dNOPAUSE -dSHORTERRORS -sDEVICE=pdfwrite "
-                                                       "-dPDFSETTINGS=/prepress %4 -I\"%1\" "
-                                                       "-sOutputFile=\"%2\" \"%3\"")
-                                                 .arg(CheminBaseGhostScript + "resource/init",
-                                                      Destination,
-                                                      PDFinwork,
-                                                      QString("-dFirstPage=%1 -dLastPage=%2").arg(QString::number(_FStart), QString::number(_FEnd)));
-                procGhost->setNativeArguments(ConstructedArguments);
-                procGhost->start(CheminBaseGhostScript + "bin/gswin64c.exe");
-                while (procGhost->state() != QProcess::NotRunning) {
+                /// METHODE PDFTk
+                auto procPDFTK = new QProcess();
+                QString ConstructedArguments =
+                  QString("\"%1\" cat %2-%3 output \"%4\"").arg(PDFinwork, QString::number(_FStart), QString::number(_FEnd), Destination);
+                procPDFTK->setNativeArguments(ConstructedArguments);
+
+                procPDFTK->start(CheminBasePDFTK);
+
+                while (procPDFTK->state() != QProcess::NotRunning) {
                     QCoreApplication::processEvents();
                     QThread::msleep(25);
-                    // Lecture
-                    auto Lecture = QString(procGhost->readAllStandardOutput()).split("\n", Qt::SkipEmptyParts);
-                    if (Lecture.count() > 0)
-                        if (Lecture.last().trimmed().size() < 15)
-                            po->setText("Préparation de " + fileNameShort + " > " + Lecture.last().trimmed());
+                    po->setText("Préparation de " + fileNameShort);
                 }
                 ListeFichiers.append(Destination);
                 QFile::remove(PDFinwork);
@@ -5627,7 +5453,7 @@ MainWindow::on_tool_merge_saveas_clicked()
         } else { // SI IMAGE
             QString imgTemp = "";
             if (_Extension.endsWith("WEBP") || _Extension.endsWith("BMP") || _Extension.endsWith("TIFF")) {
-                imgTemp = BasetempPDF + QString::fromStdString(generate_random_64bit_hex()) + ".png";
+                imgTemp = BasetempPDF + randomString8() + ".png";
                 // Convertir
                 QImage image;
                 if (!image.load(_FilePath)) {
@@ -5639,73 +5465,41 @@ MainWindow::on_tool_merge_saveas_clicked()
                     continue;
                 }
             } else if (_Extension.endsWith("JPG") || _Extension.endsWith("JPEG")) {
-                imgTemp = BasetempPDF + QString::fromStdString(generate_random_64bit_hex()) + ".jpg";
+                imgTemp = BasetempPDF + randomString8() + ".jpg";
                 copyFileWithProgress(_FilePath, imgTemp, false);
             } else if (_Extension.endsWith("PNG")) {
-                imgTemp = BasetempPDF + QString::fromStdString(generate_random_64bit_hex()) + ".png";
+                imgTemp = BasetempPDF + randomString8() + ".png";
                 copyFileWithProgress(_FilePath, imgTemp, false);
             }
-            MyConverter.convertImageToPdf(imgTemp, Destination);
+            MyConverter.convertImageToPdf(imgTemp, Destination, ui->tool_merge_optimise->isChecked());
             QFile::remove(imgTemp);
             ListeFichiers.append(Destination);
         }
     }
-    /// ECRIRE LISTEFichiers dans TEMP.ListeTEXT
-    QFile file(BasetempPDF + ".txt");
-    {
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            po->close();
-            POSE_OVERLAY_BLUR;
-            ModalConfig cfg;
-            cfg.title = "Fusionner du contenu dans un fichier PDF - Erreur";
-            cfg.message = "Impossible d'ouvrir le fichier temporaire de liste de fusion en écriture, abandon.";
-            cfg.icon = OverlayBlurWidget::iconFromStandard(QStyle::SP_MessageBoxCritical, this);
-            cfg.buttons = { OverlayBlurWidget::makeButton(0, "Abandonner", QDialogButtonBox::AcceptRole, true, true) };
-            cfg.clickOutsideToClose = false;
-            cfg.escapeButtonId = -1;
-            overlay->execModal(cfg);
-            DEPOSE_OVERLAY_BLUR;
-            return;
-        } else {
-            QTextStream out(&file);
-            for (const QString& item : ListeFichiers) {
-                out << "\"" << item << "\"\n";
-            }
-            file.close();
-        }
-        po->close();
-    }
+    po->close();
 
-    /// GHOSTSCRIPT
+    /// Assemblage avec PDFTK
     {
-        ProgressOverlay* poI = ProgressOverlay::showIndeterminate(this, "Ghostscript > Fusion des fichiers préparés...", true, true, 140);
+        ProgressOverlay* poI = ProgressOverlay::showIndeterminate(this, "PDFToolkit > Fusion des fichiers préparés...", true, true, 140);
         poI->enableBackdropBlur(true, 4.0, 0.5);
         QCoreApplication::processEvents();
 
-        QString CheminBaseGhostScript = QCoreApplication::applicationDirPath() + "/GhostScript/";
-        auto procGhost = new QProcess();
-        QString Windir = "";
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        Windir = env.value("windir");
-        env.insert("GS_LIB", QDir::toNativeSeparators(CheminBaseGhostScript) + "lib\\");
-        env.insert("GS_DLL", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-        env.insert("GS_BIN", QDir::toNativeSeparators(CheminBaseGhostScript) + "bin\\");
-        env.insert("GS_RESOURCE", QDir::toNativeSeparators(CheminBaseGhostScript) + "resource\\init");
-        env.insert("GS_FONTPATH", Windir + "\\fonts");
-        procGhost->setProcessEnvironment(env);
-        QString ConstructedArguments = QString("-dBATCH -dNOPAUSE -dSHORTERRORS -sDEVICE=pdfwrite "
-                                               "-dPDFSETTINGS=/prepress -I\"%1\" "
-                                               "-sOutputFile=\"%2\" @\"%3\"")
-                                         .arg(CheminBaseGhostScript + "resource/init", PDFFusionner, BasetempPDF + ".txt");
-        procGhost->setNativeArguments(ConstructedArguments);
-        procGhost->start(CheminBaseGhostScript + "bin/gswin64c.exe");
-        while (procGhost->state() != QProcess::NotRunning) {
+        //  On genere la ligne de commande
+        QString Ligne_commande = "";
+        for (const QString& item : ListeFichiers) {
+            Ligne_commande += " \"" + item + "\"";
+        }
+
+        auto procPDFTk = new QProcess();
+        QString ConstructedArguments = QString("%1 cat output \"%2\"").arg(Ligne_commande.trimmed(), PDFFusionner);
+        procPDFTk->setNativeArguments(ConstructedArguments);
+        procPDFTk->start(CheminBasePDFTK);
+        while (procPDFTk->state() != QProcess::NotRunning) {
             QThread::msleep(25);
             QCoreApplication::processEvents();
         }
         poI->close();
     }
-    QFile::remove(BasetempPDF + ".txt");
     foreach (auto fichier, ListeFichiers) {
         QFile::remove(fichier);
     }
@@ -6433,4 +6227,68 @@ void
 MainWindow::on_tvx_img_clear_clicked()
 {
     ui->tvx_img_liste->clear();
+}
+
+void
+MainWindow::on_Edit_Bouton_Preview_clicked()
+{
+    QElapsedTimer timer;
+    timer.start();
+    QString RANDOM = randomString8();
+    QString T_Txt = CheminTemp + "/temp_pdg" + RANDOM + ".txt";
+    QString T_Pdf = CheminTemp + "/temp_pdg" + RANDOM + ".pdf";
+    if (SauvePDG(T_Txt)) {
+        PDGHelper mPDGGen;
+        mPDGGen.SetBaseModelePath(CheminTemp);
+        mPDGGen.SetBaseImagePath(CheminImages);
+
+        mPDGGen.OpenAndParseConfig_v2("temp_pdg" + RANDOM + ".txt");
+        // Génération test tranche 0
+        QThread::msleep(25);
+        QApplication::processEvents();
+        PoDoFo::PdfMemDocument document;
+        // Setup des textes renseignes et case cochés
+        mPDGGen.vecVARIABLE.clear();
+        for (int i = 1; i < ui->PDG_ListeWidget->count(); ++i) {
+            blocQuestion* mBlocquestion = qobject_cast<blocQuestion*>(ui->PDG_ListeWidget->itemWidget(ui->PDG_ListeWidget->item(i)));
+            auto reponse = mBlocquestion->RetourneDonnee();
+            if (reponse->TypeDeBloc == blocQuestion::TypeBloc::Bloc_Texte_Simple)
+                mPDGGen.ListeQuestion[reponse->IndexControle].DefautQuestion = "Ligne";
+            if (reponse->TypeDeBloc == blocQuestion::TypeBloc::Bloc_Texte_Multiligne)
+                mPDGGen.ListeQuestion[reponse->IndexControle].DefautQuestion = "Multi\nLigne";
+            if (reponse->TypeDeBloc == blocQuestion::TypeBloc::Bloc_Case_Coche)
+                mPDGGen.ListeQuestion[reponse->IndexControle].CheckboxValue = false;
+            if (reponse->NomVariable != "") {
+                PDGHelper::stockVariable lVAR;
+                lVAR.Variable = reponse->NomVariable;
+                lVAR.Valeur = (reponse->Maximum != -1 && reponse->Maximum != INT16_MAX) ? reponse->NomVariable.chopped(reponse->Maximum) : "Test";
+                mPDGGen.vecVARIABLE.append(lVAR);
+            }
+        }
+        mPDGGen.ArrayFromREEMAKER.ReferenceSite = "Site TEST";
+        mPDGGen.ArrayFromREEMAKER.NumeroTranche = "0";
+        mPDGGen.ArrayFromREEMAKER.ReferenceREE = "ABC 001";
+        mPDGGen.ArrayFromREEMAKER.IndiceREE = "A";
+        mPDGGen.ArrayFromREEMAKER.REErouge = ui->OPT_Btn_ColTranche0->getColor().red();
+        mPDGGen.ArrayFromREEMAKER.REEvert = ui->OPT_Btn_ColTranche0->getColor().green();
+        mPDGGen.ArrayFromREEMAKER.REEbleu = ui->OPT_Btn_ColTranche0->getColor().blue();
+        mPDGGen.ArrayFromREEMAKER.REErougeAccent = ui->OPT_Btn_ColAccent0->getColor().red();
+        mPDGGen.ArrayFromREEMAKER.REEvertAccent = ui->OPT_Btn_ColAccent0->getColor().green();
+        mPDGGen.ArrayFromREEMAKER.REEbleuAccent = ui->OPT_Btn_ColAccent0->getColor().blue();
+
+        PoDoFo::PdfPage& pPage = document.GetPages().CreatePageAt(0, PoDoFo::Rect(0.0, 0.0, 595.0, 842.0));
+        PoDoFo::PdfPainter painter;
+        painter.SetCanvas(pPage);
+        mPDGGen.DrawOnPage_v2(painter, document, true);
+        painter.FinishDrawing();
+        document.Save(QStringToPdfString(T_Pdf));
+
+        // Suppression fichier TXT temporaire
+        // QFile::remove(T_Txt);
+        qDebug() << "Aperçu généré en " << timer.elapsed() << "ms";
+        QDesktopServices::openUrl(QUrl::fromLocalFile(T_Pdf));
+
+    } else {
+        // Erreur preview
+    }
 }

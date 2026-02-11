@@ -56,7 +56,7 @@ class BlocEditeur : public QWidget
     Bloc::ItemDefinition RetourneDonnee();
     bool PeuplerListe(QListWidget*, QVector<Bloc::ItemDefinition>&, qint64);
     qint64 IndexAPartirNomControle(QListWidget*, QString);
-    bool AjoutFinListe(QListWidget*, Bloc::ItemDefinition&);
+    bool AjoutFinListe(QListWidget*, Bloc::ItemDefinition&, bool AjoutPositionCourante = false);
     QString GetActionQString(Bloc::TypeAction typeAction);
 
   private slots:

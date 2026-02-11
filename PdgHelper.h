@@ -84,10 +84,12 @@ class PDGHelper : public QObject
     QVector<stockVariable> vecVARIABLE;
     PDGHelper();
     bool OpenAndParseConfig_v2(QString CheminConfig);
-    int DrawOnPage_v2(PoDoFo::PdfPainter&, PoDoFo::PdfDocument&);
+    void DessinerGrilleDeRepere(PoDoFo::PdfPainter&, double, double);
+    int DrawOnPage_v2(PoDoFo::PdfPainter&, PoDoFo::PdfDocument&, bool AfficheGrille = false);
     int ItemCount();
     int ItemQuestionCount();
     void SetBaseModelePath(QString);
+    void SetBaseImagePath(QString);
     bool BurstVersDisque(QString);
     void ClearList();
     QVector<Question> ListeQuestion;
@@ -129,6 +131,7 @@ class PDGHelper : public QObject
     bool RetourneCleBool(QVector<CmdKeys>& lVecKey, QString Cle);
     double GetMaxFontSize(PoDoFo::PdfFont&, double, double, double, QString, PoDoFo::PdfPainter&, double = 1.1);
     QString BaseModelePath;
+    QString BaseImagePath;
     QString DocumentOuvert;
 };
 #endif

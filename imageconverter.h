@@ -4,16 +4,18 @@
 #include <QApplication>
 #include <QDebug>
 #include <QDialog>
+#include <QFile>
 #include <QHBoxLayout>
 #include <QImage>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPushButton>
+#include <QRandomGenerator>
 #include <QSize>
+#include <QStandardPaths>
 #include <QString>
 #include <QVBoxLayout>
-
 #include <podofo/podofo.h>
 
 #include "OverlayWidget.h"
@@ -36,7 +38,7 @@ class ImageConverter
 {
   public:
     ImageConverter(QWidget* parent = nullptr);
-    bool convertImageToPdf(const QString& imagePath, const QString& outputPath);
+    bool convertImageToPdf(const QString& imagePath, const QString& outputPath, bool reducequality = false);
 
   private:
     ImageSizeOption getImageHandlingOption(const QSize& imageSize, const QSize& pageSize);

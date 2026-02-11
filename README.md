@@ -1,5 +1,5 @@
 # REEMakerQT
-**REEMaker 6.0** *Initium Novum*
+**REEMaker 6.0.7.0** *Initium Novum*
 
 
 Assistant de foliotage de procédure d’essai
@@ -73,7 +73,11 @@ Ce logiciel est sous license libre (GPL3)
 
 ## Les executables suivants sont utilisés :
 
- * Poppler PDFToPPM et PDFInfo
+  * PDF ToolKit
+	Boite à outil des fichiers PDF
+      [Site de PDFTK](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit)
+	[Licence GPL v2](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt)
+  * Poppler PDFToPPM et PDFInfo
 	Suite d'outil de manipulation de PDF (Transformation de PDF en image, information méta...).
       [GitHub - oschwartz10612/poppler-windows](https://github.com/oschwartz10612/poppler-windows)
 	[Licence MIT](https://raw.githubusercontent.com/oschwartz10612/poppler-windows/refs/heads/master/LICENSE)

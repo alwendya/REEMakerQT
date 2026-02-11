@@ -18,10 +18,42 @@ ImageConverter::pixelsToPdfUnits(double pixels, double dpi)
     return (pixels / dpi) * 72.0;
 }
 
-bool
-ImageConverter::convertImageToPdf(const QString& imagePath, const QString& outputPath)
+QString
+random_String_8()
 {
+    // Alphabet alphanumérique
+    static const QString kAlphabet = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+    QString out;
+    out.reserve(8);
+
+    for (int i = 0; i < 8; ++i) {
+        // Tirage uniforme sur la taille de l’alphabet
+        int idx = QRandomGenerator::global()->bounded(kAlphabet.size());
+        out.append(kAlphabet.at(idx));
+    }
+    return out;
+}
+
+bool
+ImageConverter::convertImageToPdf(const QString& imagePath, const QString& outputPath, bool reducequality)
+{
+    // HACK Reduction en jpeg
+
+    QString tempPix = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/" + random_String_8() + ".jpg";
     std::string utf8Image = imagePath.toUtf8().toStdString();
+    if (reducequality) {
+        QImage image_base(imagePath);
+        if (image_base.isNull()) {
+            qDebug() << "Erreur: Impossible de charger l'image ou format "
+                        "incorrect.";
+            return false;
+        } else {
+            if (image_base.save(tempPix, "JPEG", 70))
+                utf8Image = tempPix.toUtf8().toStdString();
+            else
+                return false;
+        }
+    }
     std::string utf8OutPath = outputPath.toUtf8().toStdString();
     try {
         bool IsPortrait = false;
@@ -65,10 +97,14 @@ ImageConverter::convertImageToPdf(const QString& imagePath, const QString& outpu
         }
 
         document.Save(utf8OutPath);
+        if (reducequality)
+            QFile::remove(tempPix);
         return true;
 
     } catch (const PdfError& e) {
         qDebug() << "Erreur PoDoFo: " << e.what();
+        if (reducequality)
+            QFile::remove(tempPix);
         return false;
     }
 }

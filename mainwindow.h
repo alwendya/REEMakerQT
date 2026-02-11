@@ -38,6 +38,7 @@
 #include <QMutex>
 #include <QProcess>
 #include <QProgressDialog>
+#include <QRandomGenerator>
 #include <QScreen>
 #include <QSettings>
 #include <QStandardPaths>
@@ -679,6 +680,8 @@ class MainWindow : public QMainWindow
 
     void on_tvx_img_clear_clicked();
 
+    void on_Edit_Bouton_Preview_clicked();
+
   protected:
     void resizeEvent(QResizeEvent* event);
 
@@ -769,6 +772,9 @@ class MainWindow : public QMainWindow
     QString CheminPDGBase;
     // Termine avec un Slash
     QString CheminPDGUtilisateur;
+    // Termine avec un Slash
+    QString CheminImages;
+
     QVector<PoDoFo::Rect> vecMediaBox;
     QVector<int> vecRotation;
     qint64 NombrePages;
